@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Visualization of Search Algorithms</title>
+    <!--<script src="https://d3js.org/d3.v5.min.js"></script>-->
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src ="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js" ></script>
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js" charset="utf-8"></script>-->
+</head>
+<body>
+    <div id="button-wrapper">
+        <button id="wholeTree" onclick="wholeTree()">Visualize whole tree</button>
+        <button id="stepByStep" onclick="stepByStep()">Animation</button>
+    </div>
+    <script>
+        var canvas = d3.select("body").append("svg")
+            .attr("width", 900)
+            .attr("height", 900)
+            .append("g")
+            .attr("transform", "translate(50 ,50)");
+
+        var tree = d3.layout.tree()
+            .size([800,800]);
+
+        function wholeTree() {
+            d3.json("mydata.json", function (data) {
+
+                var nodes = tree.nodes(data);
+                var links = tree.links(nodes);
+
+                //console.log(data);
+                console.log(nodes);
+                //console.log(links);
+
+                // adding level label
+                nodes.forEach(function(d) { d.y = d.depth * 180; });
+                var depthHash = _.uniq(_.pluck(nodes, "depth")).sort();
+                console.log("depthHash", depthHash)
+                canvas.selectAll("g.levels-svg").remove();
+                var levelSVG = canvas.append("g").attr("class", "levels-svg");
+                var levels = levelSVG.selectAll("g.level");
+                levels.data(depthHash)
+                    .enter().append("g")
+                    .attr("class", "level")
+                    //.attr("transform", function(d) { return "translate(" + d*180 + "," + 10 + ")"; })
+                    .attr("transform", function(d) { return "translate(" + 0 + "," + d*180 + ")"; })
+                    .append("text")
+                    .text(function(d){
+                        return d;
+                    });
+                //
+
+                var i = 0;
+
+                var node = canvas.selectAll(".node")
+                    //.data(nodes)
+                    .data(nodes, function(d) { return d.id || (d.id = ++i); })
+                    .enter()
+                    .append("g")
+                        .attr("class", "node")
+                        .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; })
+                node.append("circle")
+                    .attr("id",function(d){return "node-"+d.id})
+                    .attr("r", 10)
+                    .attr("fill", "steelblue");
+
+                //d3.select("#node-"+2).attr("fill", "red");
+                //d3.select("#node-"+3).attr("r", "20");
+                //console.log(d3.select("#node-"+2));
+
+                node.append("text")
+                    .text(function (d) { return d.name; });
+
+                var diagonal = d3.svg.diagonal();
+
+                canvas.selectAll(".link")
+                    .data(links)
+                    .enter()
+                    .append("path")
+                    .attr("class", "link")
+                    .attr("fill", "none")
+                    .attr("stroke", "#ADADAD")
+                    .attr("d", diagonal)
+
+            })
+        }
+
+        function stepByStep() {
+            d3.json("mydata.json", function (data) {
+                var nodes = tree.nodes(data);
+                var links = tree.links(nodes);
+                // adding level label
+                nodes.forEach(function(d) { d.y = d.depth * 180; });
+                var depthHash = _.uniq(_.pluck(nodes, "depth")).sort();
+                console.log("depthHash", depthHash)
+                canvas.selectAll("g.levels-svg").remove();
+                var levelSVG = canvas.append("g").attr("class", "levels-svg");
+                var levels = levelSVG.selectAll("g.level");
+                levels.data(depthHash)
+                    .enter().append("g")
+                    .attr("class", "level")
+                    //.attr("transform", function(d) { return "translate(" + d*180 + "," + 10 + ")"; })
+                    .attr("transform", function(d) { return "translate(" + 0 + "," + d*180 + ")"; })
+                    .append("text")
+                    .text(function(d){
+                        return d;
+                    });
+                //
+
+                var i = 0;
+                var node = canvas.selectAll(".node")
+                    .data(nodes, function(d) { return d.id || (d.id = ++i); })
+                    .enter()
+                    .append("g")
+                        .attr("class", "node")
+                        .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; })
+                node.append("circle")
+                    .attr("id",function(d){return "node-"+d.id})
+                    .attr("r", 10)
+                    .attr("fill", "steelblue");
+
+                //d3.select("#node-"+2).attr("fill", "red");
+                //d3.select("#node-"+3).attr("r", "20");
+                //console.log(d3.select("#node-"+2));
+
+                node.append("text")
+                    .text(function (d) { return d.name; });
+
+                var diagonal = d3.svg.diagonal();
+
+                canvas.selectAll(".link")
+                    .data(links)
+                    .enter()
+                    .append("path")
+                    .attr("class", "link")
+                    .attr("fill", "none")
+                    .attr("stroke", "#ADADAD")
+                    .attr("d", diagonal)
+                dft(data);
+            })
+        }
+
+        function visitElement(element,animX){
+            d3.select("#node-"+element.id)
+                .transition().duration(500).delay(500*animX)
+                .style("fill","red").style("stroke","red");
+        }
+
+        function dft(data){
+            var stack=[];
+            var animX=0;
+            stack.push(data);
+            while(stack.length!==0){
+                var element = stack.pop();
+                visitElement(element,animX);
+                animX=animX+1;
+                if(element.children!==undefined){
+                    for(var i=0; i<element.children.length; i++){
+                        stack.push(element.children[element.children.length-i-1]);
+                    }
+                }
+            }
+        }
+
+    </script>
+
+</body>
+</html>
