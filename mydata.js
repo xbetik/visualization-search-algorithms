@@ -1,5 +1,6 @@
 var treeData = {
   "name": "0",
+  "i":1,
     "children": [
   {
     "name": "2",
