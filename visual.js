@@ -80,12 +80,21 @@ function init() {
         .attr("visibility", "hidden")
         .attr("y" , circle_radius / 2)
         .attr("x", -30);
+
+    node.append("text")
+        .text(function(d) { return d.constraintLabel; })
+        .attr("id",function(d){return "con-"+d.id})
+        .attr("visibility", "hidden")
+        .attr("x" , -13)
+        .attr("y", 25);
 }
 
 function showNode(i) {
     d3.select("#node-"+ i)
         .attr("visibility", "visible");
     d3.select("#text-"+ i)
+        .attr("visibility", "visible");
+    d3.select("#con-"+ i)
         .attr("visibility", "visible");
     d3.select("#link-" + (i-1))
         .attr("visibility", "visible");
@@ -121,27 +130,14 @@ function addSideLabel() {
         .attr("class", "level")
         .attr("transform", function(d) { return "translate(" + 0 + "," + d*180 + ")"; })
         .append("text")
-            .text(function(d){ return d; })
-            .attr("id", function(d) { return "label-" + (d-1); })
-            .attr("visibility", "hidden");
+        .text(function(d){ return labels[d-1]; })
+        .attr("id", function(d) { return "label-" + (d-1); })
+        .attr("visibility", "hidden");
 }
 
 function showTree() {
     for (var i = counter; i<=nodes.length; i++) {
-        d3.select("#node-"+ i)
-            .attr("visibility", "visible");
-
-        d3.select("#text-"+ i)
-            .attr("visibility", "visible");
-
-        d3.select("#link-" + (i-1))
-            .attr("visibility", "visible");
-
-        if(nodes[i-1].depth !==0 && nodes[i-1].depth > depth) {
-            d3.select("#label-" + (depth))
-                .attr("visibility", "visible");
-            depth++;
-        }
+        showNode(i);
     }
 }
 
@@ -160,7 +156,9 @@ function animation() {
         d3.select("#link-" + (i-1))
             .attr("visibility", "visible")
             .transition().duration(500).delay(500*i)
-            .style("fill","green").style("stroke","green");
+            .attr('stroke-width', '7')
+            .style("fill","green").style("stroke","green")
+
 
         if(nodes[i-1].depth !==0 && nodes[i-1].depth > depth) {
             d3.select("#label-" + (depth))
