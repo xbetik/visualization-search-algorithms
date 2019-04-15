@@ -4,7 +4,30 @@ var depth = 0;
 init();
 
 
+function findNode(index) {
+    for (var i=0;i<nodes.length;i++) {
+        if (nodes[i].nodeOrder === index) {
+            return nodes[i];
+        }
+    }
+}
+
+// Custom links
 function getLinks(node, linksArray) {
+    var j = 0;
+    var src = 1;
+    while (j !== nodes.length-1) {
+        var target_node = findNode(src+1);
+        var source_node = target_node.parent;
+        linksArray.push( { source : source_node, target : target_node } );
+        src++;
+        j++;
+    }
+    return linksArray;
+}
+
+// BFS links
+/*function getLinks(node, linksArray) {
     if (node.children !== undefined) {
         for (var i=0; i<node.children.length; i++) {
             linksArray.push( { source : node, target : node.children[i] } );
@@ -13,7 +36,7 @@ function getLinks(node, linksArray) {
         return linksArray;
     }
     return [];
-}
+}*/
 
 function init() {
     window.canvas = d3.select("body").append("svg")
@@ -53,7 +76,8 @@ function init() {
     j=0;
 
     var node = canvas.selectAll(".node")
-        .data(nodes, function (d) { return d.id = ++j; })
+        //.data(nodes, function (d) { return d.id = ++j; })
+        .data(nodes, function (d) { return d.id = nodes[j++].nodeOrder; })
         .enter()
         .append("g")
         .attr("class", "node")
@@ -65,12 +89,12 @@ function init() {
         .style("stroke", "black")
         .attr("visibility", "hidden")
         .attr("id",function(d){return "node-"+d.id})
-        .style("fill", function(d) { if (d.color === 'red') return "red";
-        else if (d.color === 'blank') { return "white"; }
+        .style("fill", function(d) { if (d.nodeColor === 'red') return "red";
+        else if (d.nodeColor === 'blank') { return "white"; }
         else { return "black"; }})
         .attr("d", d3.svg.symbol()
             .size(300)
-            .type(function(d) { if (d.type === 'rectangle') return "square";
+            .type(function(d) { if (d.nodeType === 'rectangle') return "square";
             else { return "circle"; }
             }));
 
@@ -82,7 +106,7 @@ function init() {
         .attr("x", -30);
 
     node.append("text")
-        .text(function(d) { return d.constraintLabel; })
+        .text(function(d) { return d.label; })
         .attr("id",function(d){return "con-"+d.id})
         .attr("visibility", "hidden")
         .attr("x" , -13)
