@@ -1,8 +1,10 @@
-var circle_radius = 15;
+var node_size = 300;
+var between_node_label_gap = 10;
 var counter = 1;
-var depth = 0;
+var treeRevealed = false;
+var nodes;
+var links;
 init();
-
 
 function findNode(index) {
     for (var i=0;i<nodes.length;i++) {
@@ -12,7 +14,6 @@ function findNode(index) {
     }
 }
 
-// Custom links
 function getLinks(node, linksArray) {
     var j = 0;
     var src = 1;
@@ -26,35 +27,23 @@ function getLinks(node, linksArray) {
     return linksArray;
 }
 
-// BFS links
-/*function getLinks(node, linksArray) {
-    if (node.children !== undefined) {
-        for (var i=0; i<node.children.length; i++) {
-            linksArray.push( { source : node, target : node.children[i] } );
-            getLinks(node.children[i], linksArray);
-        }
-        return linksArray;
-    }
-    return [];
-}*/
-
 function init() {
-    window.canvas = d3.select("body").append("svg")
+    var canvas = d3.select("body").append("svg")
         .attr("width", 1200)
         .attr("height", 1200)
         .append("g")
         .attr("transform", "translate(50 ,50)");
 
-    window.tree = d3.layout.tree()
+    var tree = d3.layout.tree()
         .size([1000,1000]);
 
-    window.data = treeData;
-    window.nodes = tree.nodes(data);
+    var data = treeData;
+    nodes = tree.nodes(data);
 
     var linksArray= [];
-    window.links = getLinks(nodes[0], linksArray);
+    links = getLinks(nodes[0], linksArray);
 
-    addSideLabel();
+    addTreeLabel(canvas);
 
     var i = 0;
     var j = 0;
@@ -76,7 +65,6 @@ function init() {
     j=0;
 
     var node = canvas.selectAll(".node")
-        //.data(nodes, function (d) { return d.id = ++j; })
         .data(nodes, function (d) { return d.id = nodes[j++].nodeOrder; })
         .enter()
         .append("g")
@@ -89,59 +77,92 @@ function init() {
         .style("stroke", "black")
         .attr("visibility", "hidden")
         .attr("id",function(d){return "node-"+d.id})
-        .style("fill", function(d) { if (d.nodeColor === 'red') return "red";
-        else if (d.nodeColor === 'blank') { return "white"; }
-        else { return "black"; }})
+        .style("fill", function(d) { return d.nodeColor === 'blank' ? "white" : d.nodeColor })
         .attr("d", d3.svg.symbol()
-            .size(300)
-            .type(function(d) { if (d.nodeType === 'rectangle') return "square";
-            else { return "circle"; }
-            }));
+            .size(node_size)
+            .type(function(d) { return d.nodeType === "rectangle" ? "square" : "circle"}));
+
 
     node.append("text")
         .text(function (d) {return d.name; })
         .attr("id",function(d){return "text-"+d.id})
         .attr("visibility", "hidden")
-        .attr("y" , circle_radius / 2)
+        .attr("y" , 7)
         .attr("x", -30);
 
     node.append("text")
         .text(function(d) { return d.label; })
-        .attr("id",function(d){return "con-"+d.id})
+        .attr("id",function(d){return "nodeLabel-"+d.id})
         .attr("visibility", "hidden")
-        .attr("x" , -13)
-        .attr("y", 25);
+        .attr("text-anchor", "middle")
+        .attr("y", node_size/between_node_label_gap);
+}
+
+function getNodeIndex(index) {
+    for(var i=0; i<nodes.length; i++) {
+        if(nodes[i].nodeOrder === index) {
+            return i
+        }
+    }
 }
 
 function showNode(i) {
-    d3.select("#node-"+ i)
-        .attr("visibility", "visible");
-    d3.select("#text-"+ i)
-        .attr("visibility", "visible");
-    d3.select("#con-"+ i)
-        .attr("visibility", "visible");
-    d3.select("#link-" + (i-1))
-        .attr("visibility", "visible");
-
-    if(nodes[i-1].depth !==0 && nodes[i-1].depth > depth) {
-        d3.select("#label-" + (depth))
-            .attr("visibility", "visible");
-        depth++;
+    if(treeRevealed) {
+        d3.select("#link-" + i)
+            .attr("stroke", "red")
+            .attr("stroke-width", "5");
     }
+    else {
+        d3.select("#node-"+ i)
+            .attr("visibility", "visible");
+        d3.select("#text-"+ i)
+            .attr("visibility", "visible");
+        d3.select("#nodeLabel-"+ i)
+            .attr("visibility", "visible");
+        d3.select("#link-" + (i-1))
+            .attr("visibility", "visible");
+
+        var index = getNodeIndex(i);
+
+        d3.select("#treeLabel-" + (nodes[index].depth-1))
+            .attr("visibility", "visible");
+    }
+}
+
+function showTree() {
+    for (var i = counter; i<=nodes.length; i++) {
+        showNode(i);
+    }
+    treeRevealed = true;
 }
 
 function step() {
-    if(counter <= nodes.length) {
-        showNode(counter);
-        counter++;
+    if(counter > nodes.length) {
+        document.getElementById("errorArea").innerHTML = "End of the tree has been reached";
     }
     else {
-        console.log(counter);
-        console.log(nodes.length);
+        showNode(counter);
+        counter++
     }
 }
 
-function addSideLabel() {
+function pause() {
+    clearInterval(interval);
+}
+
+function timeNodes() {
+    if(counter > nodes.length-1){
+        pause();
+    }
+    showNode(counter);
+    counter++;
+}
+
+function animation() {
+    window.interval = setInterval(timeNodes, 500)
+}
+
+function addTreeLabel(canvas) {
     nodes.forEach(function(d) { d.y = d.depth * 180; });
     var depthHash = _.uniq(_.pluck(nodes, "depth")).sort();
     depthHash.shift();
@@ -155,45 +176,13 @@ function addSideLabel() {
         .attr("transform", function(d) { return "translate(" + 0 + "," + d*180 + ")"; })
         .append("text")
         .text(function(d){ return labels[d-1]; })
-        .attr("id", function(d) { return "label-" + (d-1); })
+        .attr("id", function(d) { return "treeLabel-" + (d-1); })
         .attr("visibility", "hidden");
-}
-
-function showTree() {
-    for (var i = counter; i<=nodes.length; i++) {
-        showNode(i);
-    }
-}
-
-function animation() {
-    for (var i = counter; i<=nodes.length; i++) {
-        d3.select("#node-"+ i)
-            .attr("visibility", "visible")
-            .transition().duration(500).delay(500*i)
-            .style("stroke","green");
-
-        d3.select("#text-"+ i)
-            .attr("visibility", "visible")
-            .transition().duration(500).delay(500*i)
-            .style("fill","green").style("stroke","green");
-
-        d3.select("#link-" + (i-1))
-            .attr("visibility", "visible")
-            .transition().duration(500).delay(500*i)
-            .attr('stroke-width', '7')
-            .style("fill","green").style("stroke","green")
-
-
-        if(nodes[i-1].depth !==0 && nodes[i-1].depth > depth) {
-            d3.select("#label-" + (depth))
-                .attr("visibility", "visible");
-            depth++;
-        }
-    }
 }
 
 function reset() {
     d3.selectAll("svg").remove();
     init();
     counter = 1;
+    treeRevealed = false;
 }

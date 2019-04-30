@@ -18,10 +18,14 @@ def readData(fileName):
     f = open(fileName, "r")
     r = f.read().splitlines()
     lines = []
+    comments = []
     for l in r:
-        s = l.split(",")
-        lines.append(s)
-    return lines
+        if l[0] == '#':
+            comments.append(l[1:])
+        else:
+            s = l.split(",")   
+            lines.append(s)
+    return lines, comments
 
 def parse(l):
     value = l[0]
@@ -104,11 +108,18 @@ def readHtml():
     f = open("index.html", "r")
     return f.read().splitlines()
     
-def writeHtml(f):
+def writeHtml(f, comments):
     lines = readHtml()
     for line in lines:
         if not ("mydata.js" in line or "visual.js" in line or line == lines[len(lines)-1]):
             f.write(line + "\n")
+    if comments != []:
+        f.write("<body>" + "\n")
+        f.write("<textarea rows=" + '"' + "3" + '"' + "cols=" + '"' + "80" + '"' + ">" + "\n")
+        for comment in comments:
+            f.write(comment + '\n')
+        f.write("</textarea>" + "\n")
+        f.write("</body>" + "\n")
     
 def readJavaScript():
     f = open("visual.js", "r")
@@ -119,9 +130,9 @@ def writeJavaScript(f):
     for line in lines:
         f.write(line + "\n")    
 
-def writeToFile(root, fileName, longest):
+def writeToFile(root, fileName, longest, comments):
     f = open(fileName, "w+")
-    writeHtml(f)
+    writeHtml(f, comments)
     
     f.write("<script>\n")
     
@@ -151,9 +162,9 @@ def main(argv):
     configFile = "config.txt"
     if len(argv) == 3:
         configFile = argv[2]    
-    lines = readData(configFile)
+    lines, comments = readData(configFile)
     tree = buildTree(lines)    
-    writeToFile(tree.root, argv[1], getLongestNode(lines))
+    writeToFile(tree.root, argv[1], getLongestNode(lines), comments)
     print argv[1] + " has been created" 
     
 if __name__ == "__main__":
