@@ -1,3 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Visualization of Search Algorithms</title>
+    <!--  compressed version of d3.v3 : http://d3js.org/d3.v3.min.js" -->
+    <script src = "https://d3js.org/d3.v3.js"></script>
+    <script src = "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js" ></script>
+    <style>
+        .button {
+            border: outset;
+            color: black;
+            padding: 12px 8px;
+            min-width: 96px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+        .slider {
+            -webkit-appearance: none;
+            width: 10%;
+            height: 25px;
+            background: #d3d3d3;
+            outline: none;
+            opacity: 0.7;
+            -webkit-transition: .2s;
+            transition: opacity .2s;
+        }
+
+        .slider:hover {
+            opacity: 1;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            background: #4CAF50;
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 25px;
+            height: 25px;
+            background: #4CAF50;
+            cursor: pointer;
+        }
+
+        .heightLabel {
+            position: absolute;
+            margin-top: 40px;
+            margin-left: -90px;
+        }
+
+        .widthLabel {
+            position: absolute;
+            margin-top: 40px;
+            margin-left: -90px;
+        }
+
+        .description {
+            position:fixed;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div id="button-wrapper">
+        <button id="showTree" class="button" onclick="showTree()">Show Tree</button>
+        <button id="animation" class="button" onclick="animation()">Animation</button>
+        <button id="step" class="button" onclick="step()">Step By Step</button>
+        <!--<button id="pause" class="button" onclick="pause()">Pause</button>-->
+        <button id="reset" class="button" onclick="reset()">Reset</button>
+        <input type="range" min="1" max="5" value="2" class="slider" id="heightSlider">
+        <label class="heightLabel" for="heightSlider">Height</label>
+        <input type="range" min="1" max="5" value="3" class="slider" id="widthSlider">
+        <label class="widthLabel" for="widthSlider">Width</label>
+        <!--<strong class="area" id="area"></strong>-->
+        <strong class="errorArea" id="errorArea"></strong>
+        <textarea class="description" id="description" rows="4" cols="70"></textarea>
+    </div>
+
+</body>
+
+
+<script>
+var labels = ["A","B","C","D"]
+var treeData = {
+ "name" : "0",
+ "nodeOrder" : 1,
+ "children" : [
+ {
+  "name" : "2",
+  "nodeOrder" : 2,
+  "children" : [
+  {
+   "name" : "1",
+   "nodeOrder" : 4,
+   "children" : [
+   {
+    "name" : "1",
+    "nodeOrder" : 12,
+    "children" : [
+    {
+     "name" : "1",
+     "nodeOrder" : 13,
+     "nodeType" : "rectangle",
+     "nodeColor" : "red",
+     "label1" : "(c3, c4)"    
+},
+    {
+     "name" : "2",
+     "nodeOrder" : 14    
+}    
+]
+   
+},
+   {
+    "name" : "2",
+    "nodeOrder" : 10   
+},
+   {
+    "name" : "3",
+    "nodeOrder" : 11   
+}   
+]
+  
+},
+  {
+   "name" : "2",
+   "nodeOrder" : 5,
+   "nodeType" : "rectangle",
+   "nodeColor" : "red",
+   "label1" : "c2 : C ∈ {1}",
+   "label2" : "c3 : C ∈ {2}"  
+},
+  {
+   "name" : "3",
+   "nodeOrder" : 6,
+   "children" : [
+   {
+    "name" : "1",
+    "nodeOrder" : 15,
+    "nodeType" : "rectangle",
+    "nodeColor" : "red",
+    "label1" : "(c1)"   
+},
+   {
+    "name" : "2",
+    "nodeOrder" : 16,
+    "nodeType" : "rectangle",
+    "nodeColor" : "red",
+    "label1" : "(c1)"   
+},
+   {
+    "name" : "3",
+    "nodeOrder" : 17,
+    "children" : [
+    {
+     "name" : "1",
+     "nodeOrder" : 18,
+     "nodeColor" : "blank"    
+},
+    {
+     "name" : "2",
+     "nodeOrder" : 19,
+     "nodeColor" : "blank"    
+}    
+]
+   
+}   
+]
+  
+}  
+]
+ 
+},
+ {
+  "name" : "3",
+  "nodeOrder" : 3,
+  "children" : [
+  {
+   "name" : "1",
+   "nodeOrder" : 7,
+   "children" : [
+   {
+    "name" : "1",
+    "nodeOrder" : 20,
+    "children" : [
+    {
+     "name" : "1",
+     "nodeOrder" : 26,
+     "nodeType" : "rectangle",
+     "nodeColor" : "red",
+     "label1" : "(c3c4)"    
+},
+    {
+     "name" : "2",
+     "nodeOrder" : 27,
+     "nodeColor" : "blank"    
+}    
+]
+   
+},
+   {
+    "name" : "2",
+    "nodeOrder" : 21,
+    "nodeType" : "rectangle",
+    "nodeColor" : "red",
+    "label1" : "(c2)"   
+},
+   {
+    "name" : "3",
+    "nodeOrder" : 22,
+    "nodeType" : "rectangle",
+    "nodeColor" : "red",
+    "label1" : "(c2)"   
+}   
+]
+  
+},
+  {
+   "name" : "2",
+   "nodeOrder" : 8,
+   "children" : [
+   {
+    "name" : "1",
+    "nodeOrder" : 23,
+    "nodeType" : "rectangle",
+    "nodeColor" : "red",
+    "label1" : "(c2)"   
+},
+   {
+    "name" : "2",
+    "nodeOrder" : 24,
+    "children" : [
+    {
+     "name" : "1",
+     "nodeOrder" : 28,
+     "nodeColor" : "blank"    
+},
+    {
+     "name" : "2",
+     "nodeOrder" : 29,
+     "nodeType" : "rectangle",
+     "nodeColor" : "red",
+     "label1" : "(c3c4)"    
+}    
+]
+   
+},
+   {
+    "name" : "3",
+    "nodeOrder" : 25,
+    "nodeType" : "rectangle",
+    "nodeColor" : "red",
+    "label1" : "(c2)"   
+}   
+]
+  
+},
+  {
+   "name" : "3",
+   "nodeOrder" : 9,
+   "nodeType" : "rectangle",
+   "nodeColor" : "red",
+   "label1" : "(c1)"  
+}  
+]
+ 
+} 
+]
+};
 var node_size = 300;
 var tree_width = 1000;
 var tree_height = 180;
@@ -258,3 +536,6 @@ widthSlider.oninput = function() {
     reset();
     showTree();
 };
+document.getElementById("description").innerHTML = "proměnné: A ∈ {2  3}  B ∈ {1  2  3}  C ∈ {1  2  3}  D ∈ {1  2} \nomezení: c1 : A 6= B  c2 : B = C  c3 : B 6= D  c4 : C 6= D\n";
+</script>
+</html>
