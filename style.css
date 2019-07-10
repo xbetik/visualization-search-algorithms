@@ -1,0 +1,31 @@
+.nodeName {
+    font-style: oblique;
+}
+
+.label1 {
+    font-weight: bold;
+}
+
+.label2 {
+    font-weight: bold;
+}
+
+.edgeLabelsRight {
+    font-family: monospace;
+    font-size: 10px;
+}
+
+.edgeLabelsLeft {
+    font-family: monospace;
+    font-size: 10px;
+}
+
+.level {
+    font-family: monospace;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.description {
+    font-style : oblique;
+}

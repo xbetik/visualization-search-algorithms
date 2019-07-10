@@ -88,6 +88,39 @@
 </body>
 
 
+<style>
+.nodeName {
+    font-style: oblique;
+}
+
+.label1 {
+    font-weight: bold;
+}
+
+.label2 {
+    font-weight: bold;
+}
+
+.edgeLabelsRight {
+    font-family: monospace;
+    font-size: 10px;
+}
+
+.edgeLabelsLeft {
+    font-family: monospace;
+    font-size: 10px;
+}
+
+.level {
+    font-family: monospace;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.description {
+    font-style : oblique;
+}
+</style>
 <script>
 var labels = ["A","B","C","D"]
 var treeData = {
@@ -104,29 +137,34 @@ var treeData = {
    "children" : [
    {
     "name" : "1",
-    "nodeOrder" : 12,
+    "nodeOrder" : 10,
     "children" : [
     {
      "name" : "1",
      "nodeOrder" : 13,
-     "nodeType" : "rectangle",
+     "shape" : "rectangle",
      "nodeColor" : "red",
-     "label1" : "(c3, c4)"    
+     "arrowToNode" : "yes",
+     "arrowFromNode" : "yes",
+     "label1" : "(c3, c4)",
+     "edgeLabelLeft" : "left label"    
 },
     {
      "name" : "2",
-     "nodeOrder" : 14    
+     "nodeOrder" : 14,
+     "edgeLabelRight" : "right label"    
 }    
 ]
    
 },
    {
     "name" : "2",
-    "nodeOrder" : 10   
+    "nodeOrder" : 11,
+    "edgeLabelLeft" : "left label"   
 },
    {
     "name" : "3",
-    "nodeOrder" : 11   
+    "nodeOrder" : 12   
 }   
 ]
   
@@ -134,8 +172,9 @@ var treeData = {
   {
    "name" : "2",
    "nodeOrder" : 5,
-   "nodeType" : "rectangle",
+   "shape" : "rectangle",
    "nodeColor" : "red",
+   "arrowToNode" : "yes",
    "label1" : "c2 : C ∈ {1}",
    "label2" : "c3 : C ∈ {2}"  
 },
@@ -146,14 +185,14 @@ var treeData = {
    {
     "name" : "1",
     "nodeOrder" : 15,
-    "nodeType" : "rectangle",
+    "shape" : "rectangle",
     "nodeColor" : "red",
     "label1" : "(c1)"   
 },
    {
     "name" : "2",
     "nodeOrder" : 16,
-    "nodeType" : "rectangle",
+    "shape" : "rectangle",
     "nodeColor" : "red",
     "label1" : "(c1)"   
 },
@@ -183,6 +222,7 @@ var treeData = {
  {
   "name" : "3",
   "nodeOrder" : 3,
+  "arrowFromNode" : "yes",
   "children" : [
   {
    "name" : "1",
@@ -195,9 +235,9 @@ var treeData = {
     {
      "name" : "1",
      "nodeOrder" : 26,
-     "nodeType" : "rectangle",
+     "shape" : "rectangle",
      "nodeColor" : "red",
-     "label1" : "(c3c4)"    
+     "label1" : "(c3, c4)"    
 },
     {
      "name" : "2",
@@ -210,14 +250,14 @@ var treeData = {
    {
     "name" : "2",
     "nodeOrder" : 21,
-    "nodeType" : "rectangle",
+    "shape" : "rectangle",
     "nodeColor" : "red",
     "label1" : "(c2)"   
 },
    {
     "name" : "3",
     "nodeOrder" : 22,
-    "nodeType" : "rectangle",
+    "shape" : "rectangle",
     "nodeColor" : "red",
     "label1" : "(c2)"   
 }   
@@ -231,7 +271,7 @@ var treeData = {
    {
     "name" : "1",
     "nodeOrder" : 23,
-    "nodeType" : "rectangle",
+    "shape" : "rectangle",
     "nodeColor" : "red",
     "label1" : "(c2)"   
 },
@@ -247,9 +287,9 @@ var treeData = {
     {
      "name" : "2",
      "nodeOrder" : 29,
-     "nodeType" : "rectangle",
+     "shape" : "rectangle",
      "nodeColor" : "red",
-     "label1" : "(c3c4)"    
+     "label1" : "(c3, c4)"    
 }    
 ]
    
@@ -257,7 +297,7 @@ var treeData = {
    {
     "name" : "3",
     "nodeOrder" : 25,
-    "nodeType" : "rectangle",
+    "shape" : "rectangle",
     "nodeColor" : "red",
     "label1" : "(c2)"   
 }   
@@ -267,7 +307,7 @@ var treeData = {
   {
    "name" : "3",
    "nodeOrder" : 9,
-   "nodeType" : "rectangle",
+   "shape" : "rectangle",
    "nodeColor" : "red",
    "label1" : "(c1)"  
 }  
@@ -324,11 +364,42 @@ function getLinks(linksArray) {
 }
 
 function init() {
-    var canvas = d3.select("body").append("svg")
+    var svg = d3.select("body").append("svg");
+    var canvas = svg
         .attr("width", tree_width+padding_x)
         .attr("height", tree_height*5)
         .append("g")
         .attr("transform", "translate(" + padding_x + "," + padding_y + ")");
+
+    let dfs = svg.append("defs");
+
+    dfs.append("marker")
+        .attr("id", "arrowToNode")
+        .attr("viewBox", "-0 -5 10 10")
+        .attr("refX", 14)
+        .attr("refY", 0)
+        .attr("orient", "auto")
+        .attr("markerWidth", 20)
+        .attr("markerHeight", 20)
+        .attr("markerUnits", "userSpaceOnUse")
+        .append('svg:path')
+        .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
+        .attr('fill', "none")
+        .style('stroke','black');
+
+    dfs.append("marker")
+        .attr("id", "arrowFromNode")
+        .attr("viewBox", "-0 -5 10 10")
+        .attr("refX", 16)
+        .attr("refY", 0)
+        .attr("orient", "auto-start-reverse")
+        .attr("markerWidth", 20)
+        .attr("markerHeight", 20)
+        .attr("markerUnits", "userSpaceOnUse")
+        .append('svg:path')
+        .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
+        .attr('fill', "none")
+        .style('stroke','black');
 
     var tree = d3.layout.tree()
         .size([tree_width]);
@@ -356,10 +427,35 @@ function init() {
         .attr('y2', function (d) {return d.target.y;})
         .attr("stroke", "black")
         .attr("stroke-width", 1.5)
+        .attr("visibility", "hidden")
+        .attr("marker-end", function(d) { return d.target.arrowToNode === "yes" ? "url(#arrowToNode)" : "url()"})
+        .attr("marker-start", function(d) { return d.target.arrowFromNode === "yes" ? "url(#arrowFromNode)" : "url()"});
+
+    j = 0;
+    canvas.selectAll(".edgeLabelsRight")
+        .data(links, function(d) { return d.id = ++j; })
+        .enter()
+        .append("text")
+        .attr("class", "edgeLabelsRight")
+        .attr("id", function(d) { return "edgeLabelRight-"+d.id })
+        .attr("y", function(d) { return d.target.y - ((d.target.y - d.source.y) / 2) })
+        .attr("x", function(d) { return d.target.x })
+        .text(function(d) { return d.target.edgeLabelRight; })
+        .attr("visibility", "hidden");
+
+    j = 0;
+    canvas.selectAll(".edgeLabelsLeft")
+        .data(links, function(d) { return d.id = ++j; })
+        .enter()
+        .append("text")
+        .attr("class", "edgeLabelsLeft")
+        .attr("id", function(d) { return "edgeLabelLeft-"+d.id })
+        .attr("y", function(d) { return d.target.y - ((d.target.y - d.source.y) / 2) })
+        .attr("x", function(d) { return d.target.x - 50})
+        .text(function(d) { return d.target.edgeLabelLeft; })
         .attr("visibility", "hidden");
 
     j=0;
-
     var node = canvas.selectAll(".node")
         .data(nodes, function (d) { return d.id = nodes[j++].nodeOrder; })
         .enter()
@@ -376,10 +472,11 @@ function init() {
         .style("fill", function(d) { return d.nodeColor === 'blank' ? "white" : d.nodeColor })
         .attr("d", d3.svg.symbol()
             .size(node_size)
-            .type(function(d) { return d.nodeType === "rectangle" ? "square" : "circle"}));
+            .type(function(d) { return d.shape === "rectangle" ? "square" : "circle"}));
 
 
     node.append("text")
+        .attr("class", "nodeName")
         .text(function (d) {return d.name; })
         .attr("id",function(d){return "text-"+d.id})
         .attr("visibility", "hidden")
@@ -387,6 +484,7 @@ function init() {
         .attr("x", -30);
 
     node.append("text")
+        .attr("class", "label1")
         .text(function(d) { return d.label1; })
         .attr("id",function(d){return "nodeLabel1-"+d.id})
         .attr("visibility", "hidden")
@@ -394,6 +492,7 @@ function init() {
         .attr("y", node_size/between_node_label_gap);
 
     node.append("text")
+        .attr("class", "label2")
         .text(function(d) { return d.label2; })
         .attr("id",function(d){return "nodeLabel2-"+d.id})
         .attr("visibility", "hidden")
@@ -426,6 +525,10 @@ function showNode(i) {
         d3.select("#nodeLabel1-"+ i)
             .attr("visibility", "visible");
         d3.select("#nodeLabel2-"+ i)
+            .attr("visibility", "visible");
+        d3.select("#edgeLabelLeft-"+ i)
+            .attr("visibility", "visible");
+        d3.select("#edgeLabelRight-"+ i)
             .attr("visibility", "visible");
 
         var node = getNode(i);
@@ -536,6 +639,6 @@ widthSlider.oninput = function() {
     reset();
     showTree();
 };
-document.getElementById("description").innerHTML = "proměnné: A ∈ {2  3}  B ∈ {1  2  3}  C ∈ {1  2  3}  D ∈ {1  2} \nomezení: c1 : A 6= B  c2 : B = C  c3 : B 6= D  c4 : C 6= D\n";
+document.getElementById("description").innerHTML = "variables: A ∈ {2  3}  B ∈ {1  2  3}  C ∈ {1  2  3}  D ∈ {1  2} \nconstraints: c1 : A 6= B  c2 : B = C  c3 : B 6= D  c4 : C 6= D\n";
 </script>
 </html>

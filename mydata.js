@@ -1,184 +1,194 @@
 var labels=["A","B","C","D"];
 var treeData = {
-  "name": "0",
+  "name" : "0",
   "nodeOrder" : 1,
-  "children": [
+  "children" : [
     {
-      "name": "2",
-      "nodeOrder" : 3,
-      "children": [
+      "name" : "2",
+      "nodeOrder" : 2,
+      "children" : [
         {
-          "name": "1",
-          "nodeOrder" : 16,
-          "children": [
+          "name" : "1",
+          "nodeOrder" : 4,
+          "children" : [
             {
-              "name": "1",
-              "nodeOrder" : 4,
-              "children": [
+              "name" : "1",
+              "nodeOrder" : 10,
+              "children" : [
                 {
-                  "name": "1",
-                  "nodeType": "rectangle",
-                  "nodeColor": "red",
-                  "nodeOrder" : 5,
-                  "label" : "(c3,c4)"
+                  "name" : "1",
+                  "nodeOrder" : 13,
+                  "nodeType" : "rectangle",
+                  "nodeColor" : "red",
+                  "label1" : "(c3, c4)",
+                  "arrowToNode" : "yes",
+                  "arrowFromNode" : "yes",
+                  "edgeLabelLeft" : "left label"
                 },
                 {
-                  "nodeOrder" : 6,
-                  "name": "2"
-                }
-              ]
-            },
-            {
-              "name": "2",
-              "nodeType": "rectangle",
-              "nodeColor": "red",
-              "nodeOrder" : 7,
-              "label" : "(c2)"
-            },
-            {
-              "name": "3",
-              "nodeType": "rectangle",
-              "nodeColor": "red",
-              "nodeOrder" : 8,
-              "label" : "(c2)"
-            }
-          ]
-        },
-        {
-          "name": "2",
-          "nodeType": "rectangle",
-          "nodeColor": "red",
-          "nodeOrder" : 9,
-          "label" : "(c1)"
-        },
-        {
-          "name": "3",
-          "nodeOrder" : 10,
-          "children": [
-            {
-              "name": "1",
-              "nodeType": "rectangle",
-              "nodeColor": "red",
-              "nodeOrder" : 11,
-              "label" : "(c1)"
-            },
-            {
-              "name": "2",
-              "nodeType": "rectangle",
-              "nodeColor": "red",
-              "nodeOrder" : 12,
-              "label" : "(c1)"
-            },
-            {
-              "name": "3",
-              "nodeOrder" : 13,
-              "children": [
-                {
-                  "name": "1",
+                  "name" : "2",
                   "nodeOrder" : 14,
-                  "nodeColor":"blank"
-                },
-                {
-                  "name": "2",
-                  "nodeOrder" : 15,
-                  "nodeColor":"blank"
+                  "edgeLabelRight" : "right label"
                 }
               ]
+
+            },
+            {
+              "name" : "2",
+              "nodeOrder" : 11,
+              "edgeLabelLeft" : "left label"
+            },
+            {
+              "name" : "3",
+              "nodeOrder" : 12,
             }
           ]
+
+        },
+        {
+          "name" : "2",
+          "nodeOrder" : 5,
+          "shape" : "rectangle",
+          "nodeColor" : "red",
+          "arrowToNode" : "yes",
+          "label1" : "c2 : C ∈ {1}",
+          "label2" : "c3 : C ∈ {2}"
+        },
+        {
+          "name" : "3",
+          "nodeOrder" : 6,
+          "children" : [
+            {
+              "name" : "1",
+              "nodeOrder" : 15,
+              "shape" : "rectangle",
+              "nodeColor" : "red",
+              "label1" : "(c1)"
+            },
+            {
+              "name" : "2",
+              "nodeOrder" : 16,
+              "shape" : "rectangle",
+              "nodeColor" : "red",
+              "label1" : "(c1)"
+            },
+            {
+              "name" : "3",
+              "nodeOrder" : 17,
+              "children" : [
+                {
+                  "name" : "1",
+                  "nodeOrder" : 18,
+                  "nodeColor" : "blank"
+                },
+                {
+                  "name" : "2",
+                  "nodeOrder" : 19,
+                  "nodeColor" : "blank"
+                }
+              ]
+
+            }
+          ]
+
         }
       ]
+
     },
     {
-      "name": "3",
-      "nodeOrder" : 2,
-      "children": [
+      "name" : "3",
+      "nodeOrder" : 3,
+      "arrowFromNode" : "yes",
+      "children" : [
         {
-          "name": "1",
-          "nodeOrder" : 17,
-          "children": [
+          "name" : "1",
+          "nodeOrder" : 7,
+          "children" : [
             {
-              "name": "1",
-              "nodeOrder" : 18,
-              "children": [
+              "name" : "1",
+              "nodeOrder" : 20,
+              "children" : [
                 {
-                  "name": "1",
-                  "nodeType": "rectangle",
-                  "nodeColor": "red",
-                  "nodeOrder" : 19,
-                  "label" : "(c3,c4)"
-                },
-                {
-                  "name": "2",
-                  "nodeOrder" : 20,
-                  "nodeColor": "blank"
-                }
-              ]
-
-            },
-            {
-              "name": "2",
-              "nodeType": "rectangle",
-              "nodeColor": "red",
-              "nodeOrder" : 21,
-              "label" : "(c2)"
-            },
-            {
-              "name": "3",
-              "nodeType": "rectangle",
-              "nodeColor": "red",
-              "nodeOrder" : 22,
-              "label" : "(c2)"
-            }
-          ]
-
-        },
-        {
-          "name": "2",
-          "nodeOrder" : 23,
-          "children": [
-            {
-              "name": "1",
-              "nodeType": "rectangle",
-              "nodeColor": "red",
-              "nodeOrder" : 24,
-              "label" : "(c2)"
-            },
-            {
-              "name": "2",
-              "nodeOrder" : 25,
-              "children": [
-                {
-                  "name": "1",
+                  "name" : "1",
                   "nodeOrder" : 26,
-                  "nodeColor": "blank"
+                  "shape" : "rectangle",
+                  "nodeColor" : "red",
+                  "label1" : "(c3, c4)"
                 },
                 {
-                  "name": "2",
-                  "nodeType": "rectangle",
-                  "nodeColor": "red",
+                  "name" : "2",
                   "nodeOrder" : 27,
-                  "label" : "(c3,c4)"
+                  "nodeColor" : "blank"
                 }
               ]
+
             },
             {
-              "name": "3",
-              "nodeType": "rectangle",
-              "nodeColor": "red",
-              "nodeOrder" : 28,
-              "label" : "(c2)"
+              "name" : "2",
+              "nodeOrder" : 21,
+              "shape" : "rectangle",
+              "nodeColor" : "red",
+              "label1" : "(c2)"
+            },
+            {
+              "name" : "3",
+              "nodeOrder" : 22,
+              "shape" : "rectangle",
+              "nodeColor" : "red",
+              "label1" : "(c2)"
             }
           ]
+
         },
         {
-          "name": "3",
-          "nodeType": "rectangle",
-          "nodeColor": "red",
-          "nodeOrder" : 29,
-          "label" : "(c1)"
+          "name" : "2",
+          "nodeOrder" : 8,
+          "children" : [
+            {
+              "name" : "1",
+              "nodeOrder" : 23,
+              "shape" : "rectangle",
+              "nodeColor" : "red",
+              "label1" : "(c2)"
+            },
+            {
+              "name" : "2",
+              "nodeOrder" : 24,
+              "children" : [
+                {
+                  "name" : "1",
+                  "nodeOrder" : 28,
+                  "nodeColor" : "blank"
+                },
+                {
+                  "name" : "2",
+                  "nodeOrder" : 29,
+                  "shape" : "rectangle",
+                  "nodeColor" : "red",
+                  "label1" : "(c3, c4)"
+                }
+              ]
+
+            },
+            {
+              "name" : "3",
+              "nodeOrder" : 25,
+              "shape" : "rectangle",
+              "nodeColor" : "red",
+              "label1" : "(c2)"
+            }
+          ]
+
         },
+        {
+          "name" : "3",
+          "nodeOrder" : 9,
+          "shape" : "rectangle",
+          "nodeColor" : "red",
+          "label1" : "(c1)"
+        }
       ]
+
     }
   ]
 };

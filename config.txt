@@ -1,31 +1,31 @@
-#proměnné: A ∈ {2  3}  B ∈ {1  2  3}  C ∈ {1  2  3}  D ∈ {1  2} 
-#omezení: c1 : A 6= B  c2 : B = C  c3 : B 6= D  c4 : C 6= D
+#variables: A ∈ {2  3}  B ∈ {1  2  3}  C ∈ {1  2  3}  D ∈ {1  2} 
+#constraints: c1 : A 6= B  c2 : B = C  c3 : B 6= D  c4 : C 6= D
 r0 0 1
 r0a2 2 2
-r0a3 3 3
+r0a3 3 3 af
 r0a2b1 1 4
-r0a2b2 2 5 s r "c2 : C ∈ {1} "c3 : C ∈ {2}
+r0a2b2 2 5 s r at "l1 c2 : C ∈ {1} "l2 c3 : C ∈ {2}
 r0a2b3 3 6
-r0a2b1c1 1 12
-r0a2b1c2 2 10
-r0a2b1c3 3 11
-r0a2b1c1d1 1 13 s r "(c3, c4)
-r0a2b1c1d2 2 14
-r0a2b3c1 1 15 s r "(c1)
-r0a2b3c2 2 16 s r "(c1)
+r0a2b1c1 1 10
+r0a2b1c2 2 11 el "l3 left label
+r0a2b1c3 3 12
+r0a2b1c1d1 1 13 s r ab el "l1 (c3, c4) "l3 left label
+r0a2b1c1d2 2 14 er "l3 right label
+r0a2b3c1 1 15 s r "l1 (c1)
+r0a2b3c2 2 16 s r "l1 (c1)
 r0a2b3c3 3 17
-r0a2b3c3d1 1 18 c b
-r0a2b3c3d2 2 19 c b
+r0a2b3c3d1 1 18 b
+r0a2b3c3d2 2 19 b
 r0a3b1 1 7
 r0a3b2 2 8
-r0a3b3 3 9 s r "(c1)
+r0a3b3 3 9 s r "l1 (c1)
 r0a3b1c1 1 20
-r0a3b1c2 2 21 s r "(c2)
-r0a3b1c3 3 22 s r "(c2)
-r0a3b1c1d1 1 26 s r "(c3c4)
-r0a3b1c1d2 2 27 c b
-r0a3b2c1 1 23 s r "(c2)
+r0a3b1c2 2 21 s r "l1 (c2)
+r0a3b1c3 3 22 s r "l1 (c2)
+r0a3b1c1d1 1 26 s r "l1 (c3, c4)
+r0a3b1c1d2 2 27 b
+r0a3b2c1 1 23 s r "l1 (c2)
 r0a3b2c2 2 24
-r0a3b2c3 3 25 s r "(c2)
-r0a3b2c2d1 1 28 c b
-r0a3b2c2d2 2 29 s r "(c3c4)
+r0a3b2c3 3 25 s r "l1 (c2)
+r0a3b2c2d1 1 28 b
+r0a3b2c2d2 2 29 s r "l1 (c3, c4)

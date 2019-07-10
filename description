@@ -1,0 +1,25 @@
+template : path value index shape color arrowOrientation edgeLabelLeftOrRight "bottomLabel "sideLabel "edgeLabel
+example : r0a2b1c1d1 1 13 s r ab el "l1 (c3, c4) "l2 (c1) "l3 left label
+
+path,value,index are required attributes, rest are optionally, the order does not matter, it can be imagined as set of optional arguments
+it is possible to add some description of given tree with letter #
+#this text will be in description of tree
+
+ATTRIBUTE		        DOMAIN					                SHORTCUTS	    DEFAULT VALUES
+shape	 		        { circle, square }  		            { c }		    square
+color	 		        { red, blank, black } 		            { r, b }	    black
+arrowOrientation	    { toNode, fromNode, bothDirections }	{ at, af, ab }	no arrow
+edgeLabelLeftOrRight    { left, right }                         { el, er }      no edge label
+
+attributes explanation:
+
+path : path containing all nodes on the way to given node(in order from root to given node)
+value : value representing given node in the tree
+index : defines the appearance order of nodes
+shape : shape of the node
+color : color of the node
+arrowOrientation : direction of edge
+edgeLabelLeftOrRight : edge label location, 2 options left or right side of the edge
+buttonLabel : name of label under the node
+sideLabel : name of label on the right side of the node
+edgeLabel : edge label name
