@@ -1,5 +1,5 @@
-#variables: A ∈ {2  3}  B ∈ {1  2  3}  C ∈ {1  2  3}  D ∈ {1  2} 
-#constraints: c1 : A 6= B  c2 : B = C  c3 : B 6= D  c4 : C 6= D
+#Variables: A ∈ {2, 3}  B ∈ {1, 2, 3}  C ∈ {1, 2, 3}  D ∈ {1, 2}
+#Constraints: c1 : A != B  c2 : B = C  c3 : B != D  c4 : C != D
 r0 0 1
 r0a2 2 2
 r0a3 3 3 af
@@ -9,7 +9,7 @@ r0a2b3 3 6
 r0a2b1c1 1 10
 r0a2b1c2 2 11 el "l3 left label
 r0a2b1c3 3 12
-r0a2b1c1d1 1 13 s r ab el "l1 (c3, c4) "l3 left label
+r0a2b1c1d1 1 13 s r ab el dl "l1 (c3, c4) "l3 left label
 r0a2b1c1d2 2 14 er "l3 right label
 r0a2b3c1 1 15 s r "l1 (c1)
 r0a2b3c2 2 16 s r "l1 (c1)

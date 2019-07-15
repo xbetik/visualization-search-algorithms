@@ -14,6 +14,7 @@ class Node:
         self.color = None
         self.arrowDirection = None
         self.edgePosition = None
+        self.dashLine = None
         self.label1 = None
         self.label2 = None
         self.label3 = None
@@ -59,7 +60,7 @@ def parse(data):
     args = data[1]
     name = args[0]
     orderRank = args[1]
-    shape, color, arrowDirection, edgePosition, label1, label2, label3 = None, None, None, None, data[2], data[3], data[4]
+    shape, color, arrowDirection, edgePosition, dashLine, label1, label2, label3 = None, None, None, None, None, data[2], data[3], data[4]
 
     args = args[2:]
     if "s" in args:
@@ -78,12 +79,14 @@ def parse(data):
         edgePosition = "left"
     if "er" in args:
         edgePosition = "right"
+    if "dl" in args:
+        dashLine = "yes"
         
-    return value, name, orderRank, shape, color, arrowDirection, edgePosition, label1, label2, label3
+    return value, name, orderRank, shape, color, arrowDirection, edgePosition, dashLine, label1, label2, label3
 
 def createNode(data, parent):
     n = Node()
-    n.value, n.name, n.orderRank, n.shape, n.color, n.arrowDirection, n.edgePosition, n.label1, n.label2, n.label3 = parse(data)
+    n.value, n.name, n.orderRank, n.shape, n.color, n.arrowDirection, n.edgePosition, n.dashLine, n.label1, n.label2, n.label3 = parse(data)
     if parent != None:
         parent.children.append(n)
     return n
@@ -104,7 +107,10 @@ def mGap(gap):
     return gap * " "
     
 def writeTreeData(node, f, gap):
-    f.write(mGap(gap) + '"name" : ' + '"' + node.name + '"' + ",\n")
+    if node.name != "root" and node.name != "r" and node.name != "Root":
+        f.write(mGap(gap) + '"name" : ' + '"' + node.name + '"' + ",\n")
+    else:
+        f.write(mGap(gap) + '"name" : ' + '"' + '"' + ",\n")
     f.write(mGap(gap) + '"nodeOrder" : ' + node.orderRank)
     if node.shape == "s":
         f.write(",\n")
@@ -126,6 +132,9 @@ def writeTreeData(node, f, gap):
         f.write(mGap(gap) + '"arrowToNode" : ' + '"' + "yes" + '"')
         f.write(",\n")
         f.write(mGap(gap) + '"arrowFromNode" : ' + '"' + "yes" + '"')
+    if node.dashLine == "yes":
+        f.write(",\n")
+        f.write(mGap(gap) + '"dashLine" : ' + '"' + "yes" + '"')
     if node.label1 != None:
         f.write(",\n")
         f.write(mGap(gap) + '"label1" : ' + '"' + node.label1 + '"')

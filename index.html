@@ -8,83 +8,31 @@
     <script src = "https://d3js.org/d3.v3.js"></script>
     <script src = "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js" ></script>
     <script src = "mydata.js"></script>
-    <style>
-        .button {
-            border: outset;
-            color: black;
-            padding: 12px 8px;
-            min-width: 96px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
-            cursor: pointer;
-        }
-        .slider {
-            -webkit-appearance: none;
-            width: 10%;
-            height: 25px;
-            background: #d3d3d3;
-            outline: none;
-            opacity: 0.7;
-            -webkit-transition: .2s;
-            transition: opacity .2s;
-        }
-
-        .slider:hover {
-            opacity: 1;
-        }
-
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 25px;
-            height: 25px;
-            background: #4CAF50;
-            cursor: pointer;
-        }
-
-        .slider::-moz-range-thumb {
-            width: 25px;
-            height: 25px;
-            background: #4CAF50;
-            cursor: pointer;
-        }
-
-        .heightLabel {
-            position: absolute;
-            margin-top: 40px;
-            margin-left: -90px;
-        }
-
-        .widthLabel {
-            position: absolute;
-            margin-top: 40px;
-            margin-left: -90px;
-        }
-
-        .description {
-            position:fixed;
-        }
-
-    </style>
+    <script src = "html2canvas.min.js"></script>
 </head>
 
 <body>
     <div id="button-wrapper">
         <button id="showTree" class="button" onclick="showTree()">Show Tree</button>
         <button id="animation" class="button" onclick="animation()">Animation</button>
-        <button id="step" class="button" onclick="step()">Step By Step</button>
+        <button id="step" class="button" onclick="step()">Step</button>
         <!--<button id="pause" class="button" onclick="pause()">Pause</button>-->
         <button id="reset" class="button" onclick="reset()">Reset</button>
-        <input type="range" min="1" max="5" value="2" class="slider" id="heightSlider">
+        <button id="screenshot" class="button" onclick="saveTreeToPng()">SavePng</button>
+        <input type="range" min="1" max="9" value=5 class="slider" id="heightSlider">
         <label class="heightLabel" for="heightSlider">Height</label>
-        <input type="range" min="1" max="5" value="3" class="slider" id="widthSlider">
+        <input type="range" min="1" max="9" value="5" class="slider" id="widthSlider">
         <label class="widthLabel" for="widthSlider">Width</label>
         <!--<strong class="area" id="area"></strong>-->
         <strong class="errorArea" id="errorArea"></strong>
-        <textarea class="description" id="description" rows="4" cols="70"></textarea>
+        <div id="infoPanel">
+            <div id="infoPanelheader">
+                <button id="infoIncrease" onclick="infoIncrease()">+</button>
+                <button id="infoDecrease" onclick="infoDecrease()">-</button>
+                <button id="infoDefault" onclick="infoDefault()">=</button>
+            </div>
+            <textarea class="description" id="description" rows="4" cols="70">sdsds</textarea>
+        </div>
     </div>
 
 </body>

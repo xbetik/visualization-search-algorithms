@@ -1,5 +1,5 @@
 var node_size = 300;
-var tree_width = 1000;
+var tree_width = 1600;
 var tree_height = 180;
 var padding_x = 50;
 var padding_y = 50;
@@ -10,7 +10,17 @@ var animationOn = false;
 var nodes;
 var links;
 var nodeGap = 0;
+
 init();
+dragElement(document.getElementById("infoPanel"));
+
+function getTextWidth(text, font) {
+    var canvas = getTextWidth.canvas || (getTextWidth.canvas = document.createElement("canvas"));
+    var context = canvas.getContext("2d");
+    context.font = font;
+    var metrics = context.measureText(text);
+    return metrics.width;
+}
 
 function getNode(index) {
     for (var i=0;i<nodes.length;i++) {
@@ -49,13 +59,22 @@ function init() {
     var svg = d3.select("body").append("svg");
     var canvas = svg
         .attr("width", tree_width+padding_x)
-        .attr("height", tree_height*5)
+        .attr("height", padding_y + (tree_height*(labels.length+1)))
         .append("g")
         .attr("transform", "translate(" + padding_x + "," + padding_y + ")");
 
-    let dfs = svg.append("defs");
+    var tree = d3.layout.tree()
+        .size([tree_width]);
 
-    dfs.append("marker")
+    var data = treeData;
+    nodes = tree.nodes(data);
+
+    var linksArray= [];
+    links = getLinks(linksArray);
+
+    addTreeLabel(canvas);
+
+    svg.append("marker")
         .attr("id", "arrowToNode")
         .attr("viewBox", "-0 -5 10 10")
         .attr("refX", 14)
@@ -69,7 +88,7 @@ function init() {
         .attr('fill', "none")
         .style('stroke','black');
 
-    dfs.append("marker")
+    svg.append("marker")
         .attr("id", "arrowFromNode")
         .attr("viewBox", "-0 -5 10 10")
         .attr("refX", 16)
@@ -82,17 +101,6 @@ function init() {
         .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
         .attr('fill', "none")
         .style('stroke','black');
-
-    var tree = d3.layout.tree()
-        .size([tree_width]);
-
-    var data = treeData;
-    nodes = tree.nodes(data);
-
-    var linksArray= [];
-    links = getLinks(linksArray);
-
-    addTreeLabel(canvas);
 
     var i = 0;
     var j = 0;
@@ -109,11 +117,18 @@ function init() {
         .attr('y2', function (d) {return d.target.y;})
         .attr("stroke", "black")
         .attr("stroke-width", 1.5)
+        .attr("stroke-dasharray", function(d) { return d.target.dashLine === "yes" ? ("3, 3") : ("0, 0")})
         .attr("visibility", "hidden")
         .attr("marker-end", function(d) { return d.target.arrowToNode === "yes" ? "url(#arrowToNode)" : "url()"})
         .attr("marker-start", function(d) { return d.target.arrowFromNode === "yes" ? "url(#arrowFromNode)" : "url()"});
 
     j = 0;
+
+    /*
+    Padding on edge labels is pretty difficult, it rely on 2 characteristics of given edge
+        1) if its right or left edge
+        2) if its left or right label
+     */
     canvas.selectAll(".edgeLabelsRight")
         .data(links, function(d) { return d.id = ++j; })
         .enter()
@@ -121,7 +136,18 @@ function init() {
         .attr("class", "edgeLabelsRight")
         .attr("id", function(d) { return "edgeLabelRight-"+d.id })
         .attr("y", function(d) { return d.target.y - ((d.target.y - d.source.y) / 2) })
-        .attr("x", function(d) { return d.target.x })
+        .attr("x", function(d) {
+            var tiny_padding = 5; // so the label wont be on the edge but lil far from it
+            if(d.source.x > d.target.x) {
+                return d.source.x - ((d.source.x-d.target.x)/2) + tiny_padding;
+            }
+            else if(d.source.x < d.target.x) {
+                return d.target.x - ((d.target.x-d.source.x)/2) + tiny_padding;
+            }
+            else {
+                return d.target.x + tiny_padding;
+            }
+        })
         .text(function(d) { return d.target.edgeLabelRight; })
         .attr("visibility", "hidden");
 
@@ -132,9 +158,26 @@ function init() {
         .append("text")
         .attr("class", "edgeLabelsLeft")
         .attr("id", function(d) { return "edgeLabelLeft-"+d.id })
-        .attr("y", function(d) { return d.target.y - ((d.target.y - d.source.y) / 2) })
-        .attr("x", function(d) { return d.target.x - 50})
+        .attr("y", function(d) { return d.target.y - ((d.target.y - d.source.y) / 2)})
+        .attr("x", function(d) {
+            var word_padding = 0;
+            if(typeof d.target.edgeLabelLeft !== "undefined") {
+                word_padding = getTextWidth(d.target.edgeLabelLeft, "8pt monospace")
+            }
+            if(d.source.x > d.target.x) {
+                return d.source.x - ((d.source.x-d.target.x)/2) - word_padding;
+            }
+            else if(d.source.x < d.target.x) {
+                return d.target.x - ((d.target.x-d.source.x)/2) - word_padding - 20;
+            }
+            else {
+                return d.target.x - word_padding; // adding a constant 8 to balance middle label a bit
+            }
+        })
+        .attr("width", "100px")
         .text(function(d) { return d.target.edgeLabelLeft; })
+        .style("overflow", "hidden")
+        //.attr("word-wrap", "break-word")
         .attr("visibility", "hidden");
 
     j=0;
@@ -192,6 +235,10 @@ function showNode(i) {
     else {
         d3.select("#link-" + (i-1))
             .attr("visibility", "visible");
+        d3.select("#edgeLabelLeft-"+ (i-1))
+            .attr("visibility", "visible");
+        d3.select("#edgeLabelRight-"+ (i-1))
+            .attr("visibility", "visible");
 
         i = i + nodeGap;
         var j = 0;
@@ -208,10 +255,6 @@ function showNode(i) {
             .attr("visibility", "visible");
         d3.select("#nodeLabel2-"+ i)
             .attr("visibility", "visible");
-        d3.select("#edgeLabelLeft-"+ i)
-            .attr("visibility", "visible");
-        d3.select("#edgeLabelRight-"+ i)
-            .attr("visibility", "visible");
 
         var node = getNode(i);
         if (node !== -1) {
@@ -227,6 +270,7 @@ function showTree() {
         showNode(i);
     }
     treeRevealed = true;
+    counter = 1;
 }
 
 function step() {
@@ -308,16 +352,91 @@ function reset() {
 var heightSlider = document.getElementById("heightSlider");
 var widthSlider = document.getElementById("widthSlider");
 
-heightSlider.oninput = function() {
-    tree_height = this.value*90;
-    //document.getElementById("area").innerHTML = "height: " + tree_height + " width: " + tree_width + " canvas: " + tree_height*5 + " " + tree_width;
+function restoreTree(restoreUntil) {
+    for(var i=1; i < restoreUntil; i++) {
+        step();
+    }
+}
+
+function restore() {
+    var restoreUntil = counter;
+    var wasRevealed = treeRevealed;
     reset();
-    showTree();
+    if(wasRevealed) {
+        showTree();
+    }
+    else {
+        restoreTree(restoreUntil);
+    }
+}
+
+heightSlider.oninput = function() {
+    tree_height = this.value*36;
+    restore();
 };
 
 widthSlider.oninput = function() {
-    tree_width = this.value*300;
-    //document.getElementById("area").innerHTML = "height: " + tree_height + " width: " + tree_width + " canvas: " + tree_height*5 + " " + tree_width;
-    reset();
-    showTree();
+    tree_width = this.value*320;
+    restore();
 };
+
+function saveTreeToPng() {
+    html2canvas(document.body).then(function(canvas) {
+        //document.body.appendChild(canvas);
+        var image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+        window.location.href=image;
+    });
+}
+
+function dragElement(elmnt) {
+    var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    if (document.getElementById(elmnt.id + "header")) {
+        /* if present, the header is where you move the DIV from:*/
+        document.getElementById(elmnt.id + "header").onmousedown = dragMouseDown;
+    } else {
+        /* otherwise, move the DIV from anywhere inside the DIV:*/
+        elmnt.onmousedown = dragMouseDown;
+    }
+
+    function dragMouseDown(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // get the mouse cursor position at startup:
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        // call a function whenever the cursor moves:
+        document.onmousemove = elementDrag;
+    }
+
+    function elementDrag(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // calculate the new cursor position:
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        // set the element's new position:
+        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+    }
+
+    function closeDragElement() {
+        /* stop moving when mouse button is released:*/
+        document.onmouseup = null;
+        document.onmousemove = null;
+    }
+}
+
+function infoIncrease() {
+    document.getElementById("description").style.fontSize = "x-large";
+}
+
+function infoDecrease() {
+    document.getElementById("description").style.fontSize = "small";
+}
+
+function infoDefault() {
+    document.getElementById("description").style.fontSize = "medium";
+}
