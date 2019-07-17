@@ -19,7 +19,7 @@ class Node:
         self.label2 = None
         self.label3 = None
         self.children = []
-        
+                
 def parseLabels(line):
     splitter = " " + '"'
     line_split = line.split(splitter)
@@ -46,14 +46,20 @@ def readData(fileName):
     r = f.read().splitlines()
     comments = []
     data = []
+    domain_labels = []
     for l in r:
         if l[0] == '#':
             comments.append(l[1:])
+        elif "label_names" in l:
+            s1 = l.split(":")
+            s2 = s1[1].split(",")
+            for label in s2:
+                domain_labels.append(label)
         else:
             path_and_args, label1, label2, label3 = parseLabels(l)
             path, args = split_path_and_arguments(path_and_args)
             data.append((path, args, label1, label2, label3))
-    return data, comments
+    return data, comments, domain_labels
 
 def parse(data):
     value = data[0]
@@ -106,6 +112,15 @@ def buildTree(data):
 def mGap(gap):
     return gap * " "
     
+def writeToMultipleLabel(multiple_label, f, gap):
+    labels = multiple_label.split(",,")
+    f.write(mGap(gap) + '"sideLabels" : [')
+    for i in range(len(labels)):
+        if i!=0:
+            f.write(",")
+        f.write('"' + labels[i] + '"')
+    f.write("]")
+
 def writeTreeData(node, f, gap):
     if node.name != "root" and node.name != "r" and node.name != "Root":
         f.write(mGap(gap) + '"name" : ' + '"' + node.name + '"' + ",\n")
@@ -140,7 +155,8 @@ def writeTreeData(node, f, gap):
         f.write(mGap(gap) + '"label1" : ' + '"' + node.label1 + '"')
     if node.label2 != None:
         f.write(",\n")
-        f.write(mGap(gap) + '"label2" : ' + '"' + node.label2 + '"')
+        writeToMultipleLabel(node.label2, f, gap)
+        #f.write(mGap(gap) + '"label2" : ' + '"' + node.label2 + '"')
     if node.label3 != None:
         f.write(",\n")
         if node.edgePosition == "left":
@@ -207,7 +223,7 @@ def writeCss(file):
         file.write(line + "\n")
     file.write("</style>\n")
 
-def writeToFile(root, fileName, longest, comments):
+def writeToFile(root, fileName, longest, comments, domain_labels):
     f = open(fileName, "w+")
     writeHtml(f, comments)
     writeCss(f)
@@ -215,8 +231,15 @@ def writeToFile(root, fileName, longest, comments):
     f.write("<script>\n")
     
     f.write("var labels = [")
-    writeLabels(root, f, longest)
-    f.write("]\n")
+    if domain_labels == []:
+        writeLabels(root, f, longest)
+        f.write("]\n")
+    else:
+        for i in range(len(domain_labels)):
+            if i!=0:
+                f.write(",")
+            f.write('"' + domain_labels[i] + '"')
+        f.write("]\n")
     
     f.write("var treeData = {\n")
     writeTreeData(root, f, 1)
@@ -237,9 +260,9 @@ def main(argv):
     configFile = "config.txt"
     if len(argv) == 3:
         configFile = argv[2]    
-    data, comments = readData(configFile)
+    data, comments, domain_labels = readData(configFile)
     tree = buildTree(data)
-    writeToFile(tree.root, argv[1], getLongestNode(data), comments)
+    writeToFile(tree.root, argv[1], getLongestNode(data), comments, domain_labels)
     print argv[1] + " has been created" 
     
 if __name__ == "__main__":

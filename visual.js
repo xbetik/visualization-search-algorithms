@@ -3,6 +3,7 @@ var tree_width = 1600;
 var tree_height = 180;
 var padding_x = 50;
 var padding_y = 50;
+var last_text_label_padding = 150;
 var between_node_label_gap = 10;
 var counter = 1;
 var treeRevealed = false;
@@ -58,7 +59,7 @@ function getLinks(linksArray) {
 function init() {
     var svg = d3.select("body").append("svg");
     var canvas = svg
-        .attr("width", tree_width+padding_x)
+        .attr("width", tree_width+padding_x+last_text_label_padding)
         .attr("height", padding_y + (tree_height*(labels.length+1)))
         .append("g")
         .attr("transform", "translate(" + padding_x + "," + padding_y + ")");
@@ -185,6 +186,7 @@ function init() {
         .data(nodes, function (d) { return d.id = nodes[j++].nodeOrder; })
         .enter()
         .append("g")
+        .attr("id", function(d) { return "g-node-" +d.id})
         .attr("class", "node")
         .attr("transform", function (d) {
             return "translate(" + d.x + "," + d.y + ")";
@@ -216,14 +218,36 @@ function init() {
         .attr("text-anchor", "middle")
         .attr("y", node_size/between_node_label_gap);
 
-    node.append("text")
-        .attr("class", "label2")
-        .text(function(d) { return d.label2; })
-        .attr("id",function(d){return "nodeLabel2-"+d.id})
-        .attr("visibility", "hidden")
-        .style("font-size", "15px")
-        .attr("x", 10)
-        .attr("y", 7);
+    addSideLabels();
+
+    /*
+    Because of the fact that doing node.append("text") I cannot append more than one text element i had to do external
+    function which uses original "nodes" data and nodeOrder as a transformation index to current node elements
+     */
+    function addSideLabels() {
+        for(var i=0;i<nodes.length;i++) {
+            if (typeof nodes[i].sideLabels !== "undefined") {
+                for(var j=0; j<nodes[i].sideLabels.length; j++) {
+                    d3.select("#g-node-" + nodes[i].nodeOrder)
+                        .append("text")
+                        .attr("id","sideLabel-"+nodes[i].nodeOrder)
+                        .attr("class", "sideLabels")
+                        .attr("visibility", "hidden")
+                        .text(nodes[i].sideLabels[j])
+                        .attr("x", 20)
+                        .attr("y", (j*18)+5);
+                }
+            }
+        }
+    }
+}
+
+function reveal(element) {
+    d3.select(element).attr("visibility", "visible");
+}
+
+function revealAll(element) {
+    d3.selectAll(element).attr("visibility", "visible");
 }
 
 function showNode(i) {
@@ -233,12 +257,9 @@ function showNode(i) {
             .attr("stroke-width", "5");
     }
     else {
-        d3.select("#link-" + (i-1))
-            .attr("visibility", "visible");
-        d3.select("#edgeLabelLeft-"+ (i-1))
-            .attr("visibility", "visible");
-        d3.select("#edgeLabelRight-"+ (i-1))
-            .attr("visibility", "visible");
+        reveal("#link-" + (i-1));
+        reveal("edgeLabelLeft-" + (i-1));
+        reveal("#edgeLabelRight-"+ (i-1));
 
         i = i + nodeGap;
         var j = 0;
@@ -247,19 +268,16 @@ function showNode(i) {
             j++;
         }
 
-        d3.select("#node-"+ i)
-            .attr("visibility", "visible");
-        d3.select("#text-"+ i)
-            .attr("visibility", "visible");
-        d3.select("#nodeLabel1-"+ i)
-            .attr("visibility", "visible");
-        d3.select("#nodeLabel2-"+ i)
-            .attr("visibility", "visible");
+        reveal("#node-"+ i);
+        reveal("#text-"+ i);
+        reveal("#nodeLabel1-"+ i);
+        reveal("#nodeLabel2-"+ i);
+        revealAll("#sideLabel-"+ i);
+        //d3.selectAll(".sideLabel-6").attr("visibility", "visible");
 
         var node = getNode(i);
         if (node !== -1) {
-            d3.select("#treeLabel-" + (node.depth-1))
-                .attr("visibility", "visible");
+            reveal("#treeLabel-" + (node.depth-1));
         }
         nodeGap+=j;
     }

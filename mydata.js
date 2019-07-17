@@ -6,6 +6,8 @@ var treeData = {
     {
       "name" : "2",
       "nodeOrder" : 2,
+      "edgeLabelLeft" : "left",
+      "edgeLabelRight" : "right",
       "children" : [
         {
           "name" : "1",
@@ -23,7 +25,8 @@ var treeData = {
                   "label1" : "(c3, c4)",
                   "arrowToNode" : "yes",
                   "arrowFromNode" : "yes",
-                  "edgeLabelLeft" : "left label"
+                  "edgeLabelLeft" : "left label",
+                  "dashLine" : "yes",
                 },
                 {
                   "name" : "2",
@@ -52,11 +55,12 @@ var treeData = {
           "nodeColor" : "red",
           "arrowToNode" : "yes",
           "label1" : "c2 : C ∈ {1}",
-          "label2" : "c3 : C ∈ {2}"
+          "sideLabels" : ["c3 : C ∈ {2}"]
         },
         {
           "name" : "3",
           "nodeOrder" : 6,
+          "sideLabels" : ["c2 : C ∈ {1}", "c3 : D ∈ {2}"],
           "children" : [
             {
               "name" : "1",
@@ -79,12 +83,14 @@ var treeData = {
                 {
                   "name" : "1",
                   "nodeOrder" : 18,
-                  "nodeColor" : "blank"
+                  "nodeColor" : "blank",
+                  "edgeLabelRight" : "D==3"
                 },
                 {
                   "name" : "2",
                   "nodeOrder" : 19,
-                  "nodeColor" : "blank"
+                  "nodeColor" : "blank",
+                  "edgeLabelRight" : "D==2"
                 }
               ]
 
@@ -98,6 +104,8 @@ var treeData = {
     {
       "name" : "3",
       "nodeOrder" : 3,
+      "edgeLabelLeft" : "left",
+      "edgeLabelRight" : "right",
       "arrowFromNode" : "yes",
       "children" : [
         {
@@ -185,6 +193,7 @@ var treeData = {
           "nodeOrder" : 9,
           "shape" : "rectangle",
           "nodeColor" : "red",
+          "sideLabels" : ["c2 : C ∈ {1}", "c3 : D ∈ {2}"],
           "label1" : "(c1)"
         }
       ]

@@ -64,7 +64,7 @@
     font-weight: bold;
 }
 
-.label2 {
+.sideLabels {
     font-weight: bold;
 }
 
@@ -140,7 +140,7 @@
 
 #description {
     width: 500px;
-    height: 50px;
+    height: 55px;
     font-size:medium;
     font-weight: bold;
     font-family:Times, "Times New Roman", serif;
