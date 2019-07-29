@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" type="text/css" href="style.css">
     <title>Visualization of Search Algorithms</title>
-    <!--  compressed version of d3.v3 : http://d3js.org/d3.v3.min.js" -->
     <script src = "https://d3js.org/d3.v3.js"></script>
     <script src = "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js"></script>
     <script src = "mydata.js"></script>
@@ -12,32 +11,17 @@
 </head>
 
 <body>
-    <div id="button-wrapper">
+    <div id="button-wrapper" data-html2canvas-ignore="true">
         <button id="showTree" class="button" onclick="showTree()">Show Tree</button>
         <button id="animation" class="button" onclick="animation()">Animation</button>
         <button id="step" class="button" onclick="step()">Step</button>
-        <!--<button id="pause" class="button" onclick="pause()">Pause</button>-->
+        <button id="stepBack" class="button" onclick="stepBack()">StepBack</button>
         <button id="reset" class="button" onclick="reset()">Reset</button>
-        <button id="screenshot" class="button" onclick="saveTreeToPng()">SavePng</button>
-        <input type="range" min="1" max="9" value=5 class="slider" id="heightSlider">
-        <label class="heightLabel" for="heightSlider">Height</label>
-        <input type="range" min="1" max="9" value="5" class="slider" id="widthSlider">
-        <label class="widthLabel" for="widthSlider">Width</label>
-        <!--<strong class="area" id="area"></strong>-->
-        <strong class="errorArea" id="errorArea"></strong>
-        <div id="infoPanel">
-            <div id="infoPanelheader">
-                <button id="infoIncrease" onclick="infoIncrease()">+</button>
-                <button id="infoDecrease" onclick="infoDecrease()">-</button>
-                <button id="infoDefault" onclick="infoDefault()">=</button>
-            </div>
-            <textarea class="description" id="description" rows="4" cols="70">
-                Backtracking algorithm
-                Variables: A ∈ {2, 3}  B ∈ {1, 2, 3} C ∈ {1, 2, 3}  D ∈ {1, 2}
-                Constraints: c1 : A != B  c2 : B = C  c3 : B != D  c4 : C != D
-            </textarea>
-        </div>
+        <button id="screenShot" class="button" onclick="saveTreeToPng()">SavePng</button>
+        <label for="heightSlider">H</label><input type="range" min="1" max="9" value=5 class="slider" id="heightSlider">
+        <label for="widthSlider">W</label><input type="range" min="1" max="9" value="3" class="slider" id="widthSlider">
     </div>
+    <div contenteditable="true" id="description"></div>
 
 </body>
 

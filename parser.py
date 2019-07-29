@@ -200,7 +200,7 @@ def writeHtml(f, comments):
 def writeComments(comments):
     bigString = ""
     for comment in comments:
-        bigString = bigString + comment + "\\" + "n" 
+        bigString = bigString + comment + "<br>"
     return bigString
 
 def writeDescription(f, comments):
@@ -233,7 +233,7 @@ def writeToFile(root, fileName, longest, comments, domain_labels):
     f.write("var labels = [")
     if domain_labels == []:
         writeLabels(root, f, longest)
-        f.write("]\n")
+        f.write("];\n")
     else:
         for i in range(len(domain_labels)):
             if i!=0:

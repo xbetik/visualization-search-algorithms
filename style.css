@@ -1,7 +1,7 @@
 .button {
     border: outset;
     color: black;
-    padding: 12px 8px;
+    padding: 8px 4px;
     min-width: 96px;
     text-align: center;
     text-decoration: none;
@@ -42,106 +42,13 @@
     cursor: pointer;
 }
 
-.heightLabel {
-    position: absolute;
-    margin-top: 40px;
-    margin-left: -120px;
-    font-family: monospace;
-}
-
-.widthLabel {
-    position: absolute;
-    margin-top: 40px;
-    margin-left: -110px;
-    font-family: monospace;
-}
-
-.nodeName {
-    font-style: oblique;
-}
-
-.label1 {
-    font-weight: bold;
-}
-
-.sideLabels {
-    font-weight: bold;
-}
-
-.edgeLabelsRight {
-    font-family: monospace;
-    font-size: 10px;
-}
-
-.edgeLabelsLeft {
-    font-family: monospace;
-    font-size: 10px;
-}
-
-.level {
-    font-family: monospace;
-    font-size: 20px;
-    font-weight: bold;
-}
-
-#infoPanel {
-    position: absolute;
-    z-index: 9;
-    background-color: #f1f1f1;
-    text-align:right;
-    /*text-align: center;*/
-    display: inline;
-    /*border: 1px solid #d3d3d3;*/
-}
-
-#infoPanelheader {
-    cursor: move;
-    z-index: 10;
-    background-color: grey;
-    color: #fff;
-}
-
-#infoIncrease {
-    background-color: white;
-    border: none;
-    color: black;
-    padding: 4px 4px;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 10px;
-    margin: 1px 1px;
-    cursor: pointer;
-}
-
-#infoDecrease  {
-    background-color: white;
-    border: none;
-    color: black;
-    padding: 4px 4px;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 10px;
-    margin: 1px 1px;
-    cursor: pointer;
-}
-
-#infoDefault  {
-    background-color: white;
-    border: none;
-    color: black;
-    padding: 4px 4px;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 10px;
-    margin: 1px 1px;
-    cursor: pointer;
-}
-
-
 #description {
-    width: 500px;
+    display : block;
+    position : absolute;
+    background : transparent;
+    width: 1000px;
     height: 55px;
-    font-size:medium;
+    font-size:large;
     font-weight: bold;
     font-family:Times, "Times New Roman", serif;
 }
