@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <title>Visualization of Search Algorithms</title>
+    <script src = "https://d3js.org/d3.v3.js"></script>
+    <script src = "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js"></script>
+    <script src = "mydata.js"></script>
+    <script src = "html2canvas.min.js"></script>
+</head>
+
+<body>
+    <div id="button-wrapper" data-html2canvas-ignore="true">
+        <button id="showTree" class="button" onclick="showTree()">Show Tree</button>
+        <button id="animation" class="button" onclick="animation()">Animation</button>
+        <button id="step" class="button" onclick="step()">Step</button>
+        <button id="stepBack" class="button" onclick="stepBack()">StepBack</button>
+        <button id="reset" class="button" onclick="reset()">Reset</button>
+        <button id="screenShot" class="button" onclick="saveTreeToPng()">SavePng</button>
+        <label for="heightSlider">H</label><input type="range" min="1" max="9" value=5 class="slider" id="heightSlider">
+        <label for="widthSlider">W</label><input type="range" min="1" max="9" value="3" class="slider" id="widthSlider">
+    </div>
+    <div contenteditable="true" id="description"></div>
+
+</body>
+
+<script src = "visual.js"></script>
+
+</html>
