@@ -4,7 +4,7 @@ import solver, cgi, create_tree
 
 def printHtml():
     print("Content-type:text/html\r\n\r\n")
-    f = open("/home/xbetik/public_html/output.html", "r")
+    f = open("output.html", "r")
     lines = f.read().splitlines()
     for line in lines:
         print(line)
@@ -19,6 +19,8 @@ constraints = form.getvalue('constraints')
 #domains = '{"A" : {1,2,3}, "B" : {1,2,3}, "C" : {1,2,3}}'
 #constraints = 'A>B,B>C'
 
-solver.solve(algorithm, domains, constraints)
-create_tree.makeHtml("/home/xbetik/public_html/input.txt", "/home/xbetik/public_html/output.html")
+input_file_name = "input.txt"
+output_file_name = "output.html"
+solver.solve(algorithm, domains, constraints, input_file_name,)
+create_tree.makeHtml(input_file_name, output_file_name)
 printHtml()

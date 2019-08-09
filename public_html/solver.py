@@ -1,7 +1,7 @@
 import cgi, sys, json
 
-def create_config(solutions, partial_solutions, d_names):
-    f = open("/home/xbetik/public_html/input.txt", "w+")
+def create_config(solutions, partial_solutions, d_names, input_file_name):
+    f = open(input_file_name, "w+")
     f.write("r0 0 1\n")
     for counter, sol in enumerate(partial_solutions, start=2):
         partial_string = "r0"
@@ -137,14 +137,14 @@ def parse(dom, constraints):
     dom_temp = "{" + dom_temp + "}"
     return json.loads(dom_temp), constraints.split(",")
     
-def solve(algorithm, domains, constraints):
+def solve(algorithm, domains, constraints, input_file_name):
     domains, constraint_list = parse(domains, constraints)
     options = { 
         "1" : backtracking,
         "2" : look_ahead,
         }
     solutions, partial_solutions = options[algorithm](domains, constraint_list)
-    create_config(solutions, partial_solutions, list(domains.keys()))
+    create_config(solutions, partial_solutions, list(domains.keys()), input_file_name)
 
 if __name__ == "__main__":
     args = sys.argv
