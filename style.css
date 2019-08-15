@@ -1,3 +1,14 @@
+table {
+    display : block;
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+}
+
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+}
+
 .button {
     border: outset;
     color: black;
@@ -46,9 +57,10 @@
     display : block;
     position : absolute;
     background : transparent;
+    padding : 10px;
     width: 1000px;
     height: 55px;
-    font-size:large;
-    font-weight: bold;
+    /*font-size:large;
+    font-weight: bold;*/
     font-family:Times, "Times New Roman", serif;
 }

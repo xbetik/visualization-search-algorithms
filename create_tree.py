@@ -1,5 +1,4 @@
-import sys
-import re
+import sys, re
 
 class Tree:
     def __init__(self):
@@ -188,7 +187,7 @@ def writeLabels(node, f, longest):
         f.write('"' + longest[i].upper() + '"')
 
 def readHtml():
-    f = open("index.html", "r")
+    f = open("tree.html", "r")
     return f.read().splitlines()
     
 def writeHtml(f, comments):
@@ -197,15 +196,22 @@ def writeHtml(f, comments):
         if not ("mydata.js" in line or "visual.js" in line or "style.css" in line or line == lines[len(lines)-1]): # filtering imports from original html version
             f.write(line + "\n")
 
-def writeComments(comments):
-    bigString = ""
-    for comment in comments:
-        bigString = bigString + comment + "<br>"
-    return bigString
-
+def writeComments(description):
+    algorithm_name = description[0]
+    domains_array = description[1].split(",")
+    constraint_array = description[2].split(",")
+    description_string = "<p>" + algorithm_name + "</p>" + "<table><tr><th>Variable</th><th>Domain</th></tr>"
+    for domain in domains_array:
+        description_string += "<tr><td>" + domain[0] + "</td><td>{" + domain[2:] + "}</td></tr>"
+    description_string += "<tr><tr><th>Constraints</th></tr>"
+    for constraint in constraint_array:
+        description_string += "<tr><td>" + constraint + "</td><tr>"
+    description_string += "</tr></table>"
+    return description_string
+            
 def writeDescription(f, comments):
     f.write("document.getElementById(" + '"' + "description" + '"' + ").innerHTML = " + '"' + writeComments(comments) + '"' + ";\n")
-
+    
 def readJavaScript():
     f = open("visual.js", "r")
     return f.read().splitlines()
@@ -251,19 +257,17 @@ def writeToFile(root, fileName, longest, comments, domain_labels):
     f.write("</script>\n")
     f.write("</html>")
          
-def printTree(n,c):
-    print 2*c * " " + n.value
-    for i in n.children:
-        printTree(i, 2*(c+1))
-
-def main(argv):
-    configFile = "config.txt"
-    if len(argv) == 3:
-        configFile = argv[2]    
-    data, comments, domain_labels = readData(configFile)
+def makeHtml(input, output):
+    data, comments, domain_labels = readData(input)
     tree = buildTree(data)
-    writeToFile(tree.root, argv[1], getLongestNode(data), comments, domain_labels)
-    print argv[1] + " has been created" 
+    writeToFile(tree.root, output, getLongestNode(data), comments, domain_labels)
     
 if __name__ == "__main__":
-    main(sys.argv)
+    args = sys.argv
+    input_file_name = args[1]
+    output_file_name = args[2]
+    makeHtml(input_file_name, output_file_name)
+    
+    
+
+    
