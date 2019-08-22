@@ -203,10 +203,11 @@ def writeComments(description):
     description_string = "<p>" + algorithm_name + "</p>" + "<table><tr><th>Variable</th><th>Domain</th></tr>"
     for domain in domains_array:
         description_string += "<tr><td>" + domain[0] + "</td><td>{" + domain[2:] + "}</td></tr>"
-    description_string += "<tr><tr><th>Constraints</th></tr>"
+    description_string += "<tr><th>Constraints</th></tr>"
     for constraint in constraint_array:
-        description_string += "<tr><td>" + constraint + "</td><tr>"
-    description_string += "</tr></table>"
+        constraint = constraint.replace("<", "&#60;") # character < is special char in html for ending header
+        description_string += "<tr><td>" + constraint + "</td></tr>"
+    description_string += "</table>"
     return description_string
             
 def writeDescription(f, comments):
@@ -229,10 +230,29 @@ def writeCss(file):
         file.write(line + "\n")
     file.write("</style>\n")
 
+def parse_size_options(size_options):
+    arr = size_options.split(",")
+    return arr[0].split("=")[1], arr[1].split("=")[1], arr[2].split("=")[1], arr[3].split("=")[1], arr[4].split("=")[1]
+
+# Sets constants placed inside javascript as variables
+def set_var_size_options(f, nodeSize):
+    f.write("const node_size=" + nodeSize + ";\n")
+    
+# Sets size of elements in style brackets
+def set_style_size_options(f, description, edge, variable_label, node_label):
+    f.write("<style>\n")
+    f.write("    #description { font-size : " + description + "px; }\n")
+    f.write("    .level { font-size : " + variable_label + "px; }\n")
+    f.write("    .sideLabels, .label1, .nodeName, .edgeLabelsLeft, .edgeLabelsRight { font-size : " + node_label + "px; }\n")
+    f.write("    .link { stroke-width : " + edge + "px; }\n")
+    f.write("</style>\n")
+
 def writeToFile(root, fileName, longest, comments, domain_labels):
     f = open(fileName, "w+")
     writeHtml(f, comments)
     writeCss(f)
+    desc, node, edge, variable_label, node_label = parse_size_options(comments[3])
+    set_style_size_options(f, desc, edge, variable_label, node_label)
     
     f.write("<script>\n")
     
@@ -251,6 +271,7 @@ def writeToFile(root, fileName, longest, comments, domain_labels):
     writeTreeData(root, f, 1)
     f.write("};\n")
 
+    set_var_size_options(f, node)
     writeJavaScript(f)
     writeDescription(f, comments)
     
