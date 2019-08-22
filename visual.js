@@ -1,4 +1,3 @@
-const node_size = 400;
 const padding_x = 50;
 const padding_y = 90;
 const most_right_label_padding = 150;
@@ -113,7 +112,7 @@ function addLinks(canvas) {
         .attr('y1', function (d) {return d.source.y;})
         .attr('y2', function (d) {return d.target.y;})
         .attr("stroke", "black")
-        .attr("stroke-width", 1.5)
+        //.attr("stroke-width", 1.5)
         .attr("stroke-dasharray", function(d) { return d.target.dashLine === "yes" ? ("3, 3") : ("0, 0")})
         .attr("visibility", "hidden")
         .attr("marker-end", function(d) { return d.target.arrowToNode === "yes" ? "url(#arrowToNode)" : "url()"})
@@ -198,7 +197,7 @@ function addNodeShape(node) {
         .attr("id",function(d){return "node-"+d.id})
         .style("fill", function(d) { return d.nodeColor === 'blank' ? "white" : d.nodeColor })
         .attr("d", d3.svg.symbol()
-            .size(node_size)
+            .size(function() { return typeof node_size === "undefined" ? 400 : node_size})
             .type(function(d) { return d.shape === "rectangle" ? "square" : "circle"}));
 }
 
@@ -224,7 +223,7 @@ function addBottomLabel(node) {
             "id" : function(d) { return "nodeLabel1-"+d.id; },
             "visibility" : "hidden",
             "text-anchor" : "middle",
-            "y" : node_size/between_node_label_gap,
+            "y" : function() { return typeof node_size === "undefined" ? 400/between_node_label_gap : node_size/between_node_label_gap},
             "font-weight" : "bold",
         });
 }
@@ -394,7 +393,7 @@ function addTreeLabel(canvas) {
             "id" : function(d) { return "treeLabel-" + (d-1); },
             "visibility" : "hidden",
             "font-weight" : "bold",
-            "font-size" : "30px",
+            //"font-size" : "30px",
             "font-family" : "monospace"
         });
 }

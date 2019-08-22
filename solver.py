@@ -29,9 +29,9 @@ def write_description(file, description_info):
 def create_config(solution, nodes, input_file_name, description_info):
     f = open(input_file_name, "w+")
     write_description(f, description_info)
-    f.write("r0 root 1\n")
+    f.write("path:=r0,name:=root,order:=1\n")
     for counter, node in enumerate(nodes, start=2):
-        partial_string = "r0"
+        partial_string = "path:=r0"
         domains = node[0]
         node_name = None
         for domain in domains:
@@ -39,26 +39,32 @@ def create_config(solution, nodes, input_file_name, description_info):
             value = domain[1]
             partial_string += variable + str(value)
             node_name = value
-        partial_string += " " + str(node_name) + " "
-        partial_string += str(counter)
+        partial_string += ",name:=" + str(node_name)
+        partial_string += ",order:=" +str(counter)
         
         if node[1] == "d":
-            partial_string += " s r"
+            partial_string += ",shape:=s,color:=r"
         if any(node[0] == s for s in solution):
-            partial_string += " b"
+            partial_string += ",color:=b"
         if node[2] != None:
-            partial_string += " " + '"' + "l1 (c" + str(node[2]+1) + ")"
+            partial_string += ",bottom_label:=(" + str(node[2]+1) + ")"
         if node[3] != None:
-            partial_string += ' "l2 '
+            partial_string += ",side_label:="
             place_separator = False
             for key in list(node[3].keys())[::-1]:
                 if place_separator:
-                    partial_string += ",, "
+                    partial_string += "&&"
                 partial_string += key + " : "
                 if node[3].get(key) == []:
                     partial_string += "{}"
                 else:
-                    partial_string += str(set(node[3].get(key)))
+                    values = node[3].get(key)
+                    partial_string += "{"
+                    for val in values:
+                        partial_string += str(val)
+                        if val != values[len(values)-1]:
+                            partial_string += " "
+                    partial_string += "}"
                 place_separator = True
         f.write(partial_string + "\n")
 
