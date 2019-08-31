@@ -11,6 +11,8 @@ let nodes;
 let links;
 let nodeGap = 0;
 let counter = 1;
+let jumpOn = false;
+let cfg_shown = false;
 
 init();
 
@@ -39,6 +41,27 @@ function init() {
     addNodeName(node);
     addBottomLabel(node);
     addSideLabels();
+    addJumps(svg);
+}
+
+function addJumps(svg) {
+    for(let i=0;i<nodes.length;i++) {
+        if (typeof nodes[i].jump !== "undefined") {
+            svg.append("path")
+                .attr("id", "jump-" + nodes[i].nodeOrder)
+                .attr("stroke-width", "3px")
+                .attr("fill", "none")
+                .attr("stroke", "black")
+                //.attr("d", function() { return setDiagonal(getNode(nodes[i].nodeOrder), getNode(nodes[i].nodeOrder+1).nodeOrder) })
+                .attr("d", d3.svg.diagonal()
+                    .source({x: getNode(nodes[i].nodeOrder).x, y: getNode(nodes[i].nodeOrder).y-10})
+                    .target({x: getNode(nodes[i].nodeOrder + 1).parent.x, y: getNode(nodes[i].nodeOrder + 1).parent.y+10}))
+                    .attr("transform", "translate(" + padding_x + "," + padding_y + ")")
+                    .attr("visibility", "hidden")
+                    .attr("stroke-dasharray", ("3, 3"))
+                    .attr("marker-end", "url(#arrowToNode)");
+        }
+    }
 }
 
 function getTextWidth(text, font) {
@@ -268,21 +291,39 @@ function hideAll(element) {
     d3.selectAll(element).attr("visibility", "hidden");
 }
 
-function hideNode(i) {
-    if(treeRevealed) {
-        d3.select("#link-" + i)
-            .attr("stroke", "black")
-            .attr("stroke-width", 1.5);
+function revealBackJump(i) {
+    if (getNode(i).jump === "yes") {
+        if (jumpOn) {
+            if (treeRevealed) {
+                d3.select("#jump-"+i).attr("stroke", "red")
+            }
+            else {
+                reveal("#jump-"+i);
+            }
+            jumpOn = false;
+        }
+        else {
+            jumpOn = true;
+            counter--;
+        }
     }
-    else {
-        hide("#link-" + (i-1));
-        hide("#edgeLabelLeft-" + (i-1));
-        hide("#edgeLabelRight-"+ (i-1));
-        hide("#node-"+ i);
-        hide("#text-"+ i);
-        hide("#nodeLabel1-"+ i);
-        hide("#nodeLabel2-"+ i);
-        hideAll("#sideLabel-"+ i);
+}
+
+function hideBackJump(i) {
+    if (getNode(i).jump === "yes") {
+        if (!jumpOn) {
+            if (treeRevealed) {
+                d3.select("#jump-"+i).attr("stroke", "black")
+            }
+            else {
+                hide("#jump-"+i);
+            }
+            jumpOn = true;
+            counter++;
+        }
+        else {
+            jumpOn = false;
+        }
     }
 }
 
@@ -291,6 +332,7 @@ function showNode(i) {
         d3.select("#link-" + i)
             .attr("stroke", "red")
             .attr("stroke-width", "5");
+        revealBackJump(i+1); // nodes reveals 1-time faster than links
     }
     else {
         reveal("#link-" + (i-1));
@@ -306,15 +348,41 @@ function showNode(i) {
         if (node !== -1) {
             reveal("#treeLabel-" + (node.depth-1));
         }
+        revealBackJump(i)
+    }
+}
+
+function hideNode(i) {
+    if(treeRevealed) {
+        hideBackJump(i+1);
+        i = counter;
+        d3.select("#link-" + i)
+            .attr("stroke", "black")
+            .attr("stroke-width", 1.5);
+    }
+    else {
+        hideBackJump(i);
+        i = counter;
+        hide("#link-" + (i-1));
+        hide("#edgeLabelLeft-" + (i-1));
+        hide("#edgeLabelRight-"+ (i-1));
+        hide("#node-"+ i);
+        hide("#text-"+ i);
+        hide("#nodeLabel1-"+ i);
+        hide("#nodeLabel2-"+ i);
+        hideAll("#sideLabel-"+ i);
+        hide("#jump-"+i)
     }
 }
 
 function showTree() {
     for (let i = counter; i<=nodes.length; i++) {
+        jumpOn = true;
         showNode(i);
     }
     treeRevealed = true;
     counter = 1;
+    jumpOn = false;
 }
 
 function step() {
@@ -439,4 +507,15 @@ function saveTreeToPng() {
         let image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
         window.location.href=image;
     });
+}
+
+function showConfig() {
+    if (cfg_shown) {
+        document.getElementById("configFile").style.visibility = "hidden";
+        cfg_shown = false;
+    }
+    else {
+        document.getElementById("configFile").style.visibility = "visible";
+        cfg_shown = true;
+    }
 }
