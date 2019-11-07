@@ -1,4 +1,526 @@
-const padding_x = 250;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Visualization of Search Algorithms</title>
+    <script src = "https://d3js.org/d3.v3.js"></script>
+    <script src = "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js"></script>
+    <script src = "html2canvas.min.js"></script>
+</head>
+
+<body>
+    <div id="button-wrapper" data-html2canvas-ignore="true">
+        <button id="showTree" class="button" onclick="showTree()">Show Solution</button>
+        <button id="animation" class="button" onclick="animation()">Animation</button>
+        <button id="step" class="button" onclick="step()">Step</button>
+        <button id="stepBack" class="button" onclick="stepBack()">StepBack</button>
+        <button id="reset" class="button" onclick="reset()">Reset</button>
+        <button id="screenShot" class="button" onclick="saveTreeToPng()">SavePng</button>
+        <label for="heightSlider">H</label><input type="range" min="1" max="9" value=5 class="slider" id="heightSlider">
+        <label for="widthSlider">W</label><input type="range" min="1" max="9" value="3" class="slider" id="widthSlider">
+        <button id="showConfig" class="button" onclick="showConfig()">Show/Hide CFG</button>
+        <form id="myform" action = "http://localhost:9999/cgi/call_create_tree.cgi" method="get"> <!-- on server it is action = create_tree.cgi-->
+            <textarea spellcheck="false" name="new_config_file" id="configFile" rows = "50" cols = "70"></textarea>
+            <input id="submit_button" type = "submit" value = "Generate New Tree"/>
+        </form>
+        <a href="help.html" id="help" target="_blank">Config Explanation</a>
+    </div>
+    <div contenteditable="true" spellcheck="false" id="description"></div>
+
+</body>
+
+
+<style>
+table {
+    display : block;
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+}
+
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+}
+
+.button {
+    -webkit-tap-highlight-color: transparent;
+    border:none;
+    color: black;
+    padding: 8px 4px;
+    min-width: 96px;
+    text-align: center;
+    display: inline-block;
+    font-family:monospace;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 20px;
+}
+.slider {
+    -webkit-appearance: none;
+    width: 10%;
+    height: 10px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+}
+
+.slider:hover {
+    opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    background: #4CAF50;
+    cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    background: #4CAF50;
+    cursor: pointer;
+}
+
+#description {
+    display : block;
+    position : absolute;
+    background : transparent;
+    padding : 10px;
+    width: 1000px;
+    height: 55px;
+    /*font-size:large;
+    font-weight: bold;*/
+    font-family:Times, "Times New Roman", serif;
+}
+
+#myform {
+    display: inline;
+    background : transparent;
+    border-color : transparent;
+    border-style : none;
+    visibility : hidden;
+}
+
+#submit_button {
+    position:absolute;
+    color: black;
+    min-width: 96px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-family:monospace;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 20px;
+}
+
+#help {
+    position:absolute;
+    background-color: #f44336;
+    color: white;
+    margin-left: 300px;
+    padding: 5px 75px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    visibility:hidden;
+}
+
+#configFile {
+    display:inline-block;
+    position: absolute;
+    margin-top:30px;
+}
+
+    #description { font-size : 16px; }
+    .level { font-size : 20px; }
+    .sideLabels, .label1, .nodeName, .edgeLabelsLeft, .edgeLabelsRight { font-size : 16px; }
+</style>
+<script>
+var labels = ["A","B","C"];
+var treeData = {
+ "name" : "",
+ "nodeOrder" : 1,
+ "children" : [
+ {
+  "name" : "",
+  "nodeOrder" : 2,
+  "children" : [
+  {
+   "name" : "",
+   "nodeOrder" : 3,
+   "children" : [
+   {
+    "name" : "",
+    "nodeOrder" : 4,
+    "nodeColor" : "blank"   
+},
+   {
+    "name" : "",
+    "nodeOrder" : 5,
+    "nodeColor" : "blank"   
+},
+   {
+    "name" : "",
+    "nodeOrder" : 16,
+    "nodeColor" : "blank"   
+}   
+]
+  
+},
+  {
+   "name" : "",
+   "nodeOrder" : 6,
+   "children" : [
+   {
+    "name" : "",
+    "nodeOrder" : 7,
+    "nodeColor" : "blank"   
+},
+   {
+    "name" : "",
+    "nodeOrder" : 8,
+    "nodeColor" : "blank"   
+},
+   {
+    "name" : "",
+    "nodeOrder" : 17,
+    "nodeColor" : "blank"   
+}   
+]
+  
+},
+  {
+   "name" : "",
+   "nodeOrder" : 18,
+   "children" : [
+   {
+    "name" : "",
+    "nodeOrder" : 19,
+    "nodeColor" : "blank"   
+},
+   {
+    "name" : "",
+    "nodeOrder" : 20,
+    "nodeColor" : "blank"   
+},
+   {
+    "name" : "",
+    "nodeOrder" : 21,
+    "nodeColor" : "blank"   
+}   
+]
+  
+}  
+]
+ 
+},
+ {
+  "name" : "",
+  "nodeOrder" : 9,
+  "children" : [
+  {
+   "name" : "",
+   "nodeOrder" : 10,
+   "children" : [
+   {
+    "name" : "",
+    "nodeOrder" : 11,
+    "nodeColor" : "blank"   
+},
+   {
+    "name" : "",
+    "nodeOrder" : 12,
+    "nodeColor" : "blank"   
+},
+   {
+    "name" : "",
+    "nodeOrder" : 22,
+    "nodeColor" : "blank"   
+}   
+]
+  
+},
+  {
+   "name" : "",
+   "nodeOrder" : 13,
+   "children" : [
+   {
+    "name" : "",
+    "nodeOrder" : 14,
+    "nodeColor" : "blank"   
+},
+   {
+    "name" : "",
+    "nodeOrder" : 15,
+    "nodeColor" : "blank"   
+},
+   {
+    "name" : "",
+    "nodeOrder" : 23,
+    "nodeColor" : "blank"   
+}   
+]
+  
+},
+  {
+   "name" : "",
+   "nodeOrder" : 24,
+   "children" : [
+   {
+    "name" : "",
+    "nodeOrder" : 25,
+    "nodeColor" : "blank"   
+},
+   {
+    "name" : "",
+    "nodeOrder" : 26,
+    "nodeColor" : "blank"   
+},
+   {
+    "name" : "",
+    "nodeOrder" : 27,
+    "nodeColor" : "blank"   
+}   
+]
+  
+}  
+]
+ 
+},
+ {
+  "name" : "",
+  "nodeOrder" : 28,
+  "children" : [
+  {
+   "name" : "",
+   "nodeOrder" : 29,
+   "children" : [
+   {
+    "name" : "",
+    "nodeOrder" : 30,
+    "nodeColor" : "blank"   
+},
+   {
+    "name" : "",
+    "nodeOrder" : 31,
+    "nodeColor" : "blank"   
+},
+   {
+    "name" : "",
+    "nodeOrder" : 32,
+    "nodeColor" : "blank"   
+}   
+]
+  
+},
+  {
+   "name" : "",
+   "nodeOrder" : 33,
+   "children" : [
+   {
+    "name" : "",
+    "nodeOrder" : 34,
+    "nodeColor" : "blank"   
+},
+   {
+    "name" : "",
+    "nodeOrder" : 35,
+    "nodeColor" : "blank"   
+},
+   {
+    "name" : "",
+    "nodeOrder" : 36,
+    "nodeColor" : "blank"   
+}   
+]
+  
+},
+  {
+   "name" : "",
+   "nodeOrder" : 37,
+   "children" : [
+   {
+    "name" : "",
+    "nodeOrder" : 38,
+    "nodeColor" : "blank"   
+},
+   {
+    "name" : "",
+    "nodeOrder" : 39,
+    "nodeColor" : "blank"   
+},
+   {
+    "name" : "",
+    "nodeOrder" : 40,
+    "nodeColor" : "blank"   
+}   
+]
+  
+}  
+]
+ 
+},
+ {
+  "name" : "",
+  "nodeOrder" : 41,
+  "children" : [
+  {
+   "name" : "",
+   "nodeOrder" : 42,
+   "children" : [
+   {
+    "name" : "",
+    "nodeOrder" : 43,
+    "nodeColor" : "blank"   
+},
+   {
+    "name" : "",
+    "nodeOrder" : 44,
+    "nodeColor" : "blank"   
+},
+   {
+    "name" : "",
+    "nodeOrder" : 45,
+    "nodeColor" : "blank"   
+}   
+]
+  
+},
+  {
+   "name" : "",
+   "nodeOrder" : 46,
+   "children" : [
+   {
+    "name" : "",
+    "nodeOrder" : 47,
+    "nodeColor" : "blank"   
+},
+   {
+    "name" : "",
+    "nodeOrder" : 48,
+    "nodeColor" : "blank"   
+},
+   {
+    "name" : "",
+    "nodeOrder" : 49,
+    "nodeColor" : "blank"   
+}   
+]
+  
+},
+  {
+   "name" : "",
+   "nodeOrder" : 50,
+   "children" : [
+   {
+    "name" : "",
+    "nodeOrder" : 51,
+    "nodeColor" : "blank"   
+},
+   {
+    "name" : "",
+    "nodeOrder" : 52,
+    "nodeColor" : "blank"   
+},
+   {
+    "name" : "",
+    "nodeOrder" : 53,
+    "nodeColor" : "blank"   
+}   
+]
+  
+}  
+]
+ 
+},
+ {
+  "name" : "",
+  "nodeOrder" : 54,
+  "children" : [
+  {
+   "name" : "",
+   "nodeOrder" : 55,
+   "children" : [
+   {
+    "name" : "",
+    "nodeOrder" : 56,
+    "nodeColor" : "blank"   
+},
+   {
+    "name" : "",
+    "nodeOrder" : 57,
+    "nodeColor" : "blank"   
+},
+   {
+    "name" : "",
+    "nodeOrder" : 58,
+    "nodeColor" : "blank"   
+}   
+]
+  
+},
+  {
+   "name" : "",
+   "nodeOrder" : 59,
+   "children" : [
+   {
+    "name" : "",
+    "nodeOrder" : 60,
+    "nodeColor" : "blank"   
+},
+   {
+    "name" : "",
+    "nodeOrder" : 61,
+    "nodeColor" : "blank"   
+},
+   {
+    "name" : "",
+    "nodeOrder" : 62,
+    "nodeColor" : "blank"   
+}   
+]
+  
+},
+  {
+   "name" : "",
+   "nodeOrder" : 63,
+   "children" : [
+   {
+    "name" : "",
+    "nodeOrder" : 64,
+    "nodeColor" : "blank"   
+},
+   {
+    "name" : "",
+    "nodeOrder" : 65,
+    "nodeColor" : "blank"   
+},
+   {
+    "name" : "",
+    "nodeOrder" : 66,
+    "nodeColor" : "blank"   
+}   
+]
+  
+}  
+]
+ 
+} 
+]
+};
+const node_size=400;
+const stroke_width=1.5;
+const coloredLimit=14;
+let show_frame=true;
+const padding_x = 200;
 const padding_y = 90;
 const most_right_label_padding = 150;
 const most_down_label_padding = 50;
@@ -53,13 +575,6 @@ function init() {
     }
 }
 
-function jumpDirection(source_index, target_index) {
-    if (getNode(source_index).x < getNode(target_index).x) {
-        return -100;
-    }
-    return 100;
-}
-
 function addJumps(svg) {
     var lineFunction = d3.svg.line()
         .x(function(d) { return d.x; })
@@ -75,9 +590,8 @@ function addJumps(svg) {
                 .attr("fill", "none")
                 .attr("stroke", "black")
                 .attr("d", lineFunction([
-
                     { "x" : getNode(nodes[i].nodeOrder).x, "y" : getNode(nodes[i].nodeOrder).y-10 },
-                    { "x" : getNode(nodes[i].jump).x+jumpDirection(nodes[i].nodeOrder, nodes[i].jump), "y" : y},
+                    { "x" : getNode(nodes[i].jump).x-80, "y" : y},
                     { "x" : getNode(nodes[i].jump).x, "y" : getNode(nodes[i].jump).y }
                 ]))
                 .attr("transform", "translate(" + padding_x + "," + padding_y + ")")
@@ -264,10 +778,8 @@ function addNodeName(node) {
         .attr("visibility", "hidden")
         .style("fill", function(d) { return typeof d.nodeColor === "undefined" ? "white" : "black" })
         .attr({
-            "text-anchor" : "middle",
-            "y" : 6,
-            //"y" : 5,
-            //"x" : -4,
+            "y" : 5,
+            "x" : -4,
             "font-weight" : "bold"
         });
 }
@@ -582,3 +1094,7 @@ function showConfig() {
         cfg_shown = true;
     }
 }
+document.getElementById("description").innerHTML = "<p><strong>IB(2) ITERATIVE BROADENING</strong></p><table><tr><th>Variable</th><th>Domain</th></tr><tr><td>A</td><td>{ 1 2 3 4 5 }</td></tr><tr><td>B</td><td>{ 1 2 3 }</td></tr><tr><td>C</td><td>{ 1 2 3 }</td></tr><tr><th>Constraints</th></tr><tr><td>No constraints</td></tr></table>";
+document.getElementById("configFile").value = "#IB(2) ITERATIVE BROADENING\n#A 1 2 3 4 5,B 1 2 3,C 1 2 3\n#No constraints\n#description_size=16,node_size=400,edge_size=1.5,variable_label_size=20,node_label_size=16,show_frame=true,colored_limit=14\npath:=r0;name:=none;order:=1\npath:=r0A1;name:=none;order:=2\npath:=r0A1B1;name:=none;order:=3\npath:=r0A1B1C1;name:=none;order:=4;color:=blank\npath:=r0A1B1C2;name:=none;order:=5;color:=blank\npath:=r0A1B1C3;name:=none;order:=16;color:=blank\npath:=r0A1B2;name:=none;order:=6\npath:=r0A1B2C1;name:=none;order:=7;color:=blank\npath:=r0A1B2C2;name:=none;order:=8;color:=blank\npath:=r0A1B2C3;name:=none;order:=17;color:=blank\npath:=r0A1B3;name:=none;order:=18\npath:=r0A1B3C1;name:=none;order:=19;color:=blank\npath:=r0A1B3C2;name:=none;order:=20;color:=blank\npath:=r0A1B3C3;name:=none;order:=21;color:=blank\npath:=r0A2;name:=none;order:=9\npath:=r0A2B1;name:=none;order:=10\npath:=r0A2B1C1;name:=none;order:=11;color:=blank\npath:=r0A2B1C2;name:=none;order:=12;color:=blank\npath:=r0A2B1C3;name:=none;order:=22;color:=blank\npath:=r0A2B2;name:=none;order:=13\npath:=r0A2B2C1;name:=none;order:=14;color:=blank\npath:=r0A2B2C2;name:=none;order:=15;color:=blank\npath:=r0A2B2C3;name:=none;order:=23;color:=blank\npath:=r0A2B3;name:=none;order:=24\npath:=r0A2B3C1;name:=none;order:=25;color:=blank\npath:=r0A2B3C2;name:=none;order:=26;color:=blank\npath:=r0A2B3C3;name:=none;order:=27;color:=blank\npath:=r0A3;name:=none;order:=28\npath:=r0A3B1;name:=none;order:=29\npath:=r0A3B1C1;name:=none;order:=30;color:=blank\npath:=r0A3B1C2;name:=none;order:=31;color:=blank\npath:=r0A3B1C3;name:=none;order:=32;color:=blank\npath:=r0A3B2;name:=none;order:=33\npath:=r0A3B2C1;name:=none;order:=34;color:=blank\npath:=r0A3B2C2;name:=none;order:=35;color:=blank\npath:=r0A3B2C3;name:=none;order:=36;color:=blank\npath:=r0A3B3;name:=none;order:=37\npath:=r0A3B3C1;name:=none;order:=38;color:=blank\npath:=r0A3B3C2;name:=none;order:=39;color:=blank\npath:=r0A3B3C3;name:=none;order:=40;color:=blank\npath:=r0A4;name:=none;order:=41\npath:=r0A4B1;name:=none;order:=42\npath:=r0A4B1C1;name:=none;order:=43;color:=blank\npath:=r0A4B1C2;name:=none;order:=44;color:=blank\npath:=r0A4B1C3;name:=none;order:=45;color:=blank\npath:=r0A4B2;name:=none;order:=46\npath:=r0A4B2C1;name:=none;order:=47;color:=blank\npath:=r0A4B2C2;name:=none;order:=48;color:=blank\npath:=r0A4B2C3;name:=none;order:=49;color:=blank\npath:=r0A4B3;name:=none;order:=50\npath:=r0A4B3C1;name:=none;order:=51;color:=blank\npath:=r0A4B3C2;name:=none;order:=52;color:=blank\npath:=r0A4B3C3;name:=none;order:=53;color:=blank\npath:=r0A5;name:=none;order:=54\npath:=r0A5B1;name:=none;order:=55\npath:=r0A5B1C1;name:=none;order:=56;color:=blank\npath:=r0A5B1C2;name:=none;order:=57;color:=blank\npath:=r0A5B1C3;name:=none;order:=58;color:=blank\npath:=r0A5B2;name:=none;order:=59\npath:=r0A5B2C1;name:=none;order:=60;color:=blank\npath:=r0A5B2C2;name:=none;order:=61;color:=blank\npath:=r0A5B2C3;name:=none;order:=62;color:=blank\npath:=r0A5B3;name:=none;order:=63\npath:=r0A5B3C1;name:=none;order:=64;color:=blank\npath:=r0A5B3C2;name:=none;order:=65;color:=blank\npath:=r0A5B3C3;name:=none;order:=66;color:=blank";
+</script>
+</html>

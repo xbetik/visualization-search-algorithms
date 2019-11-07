@@ -12,7 +12,7 @@
 
 <body>
     <div id="button-wrapper" data-html2canvas-ignore="true">
-        <button id="showTree" class="button" onclick="showTree()">Show Tree</button>
+        <button id="showTree" class="button" onclick="showTree()">Show Solution</button>
         <button id="animation" class="button" onclick="animation()">Animation</button>
         <button id="step" class="button" onclick="step()">Step</button>
         <button id="stepBack" class="button" onclick="stepBack()">StepBack</button>
@@ -20,10 +20,14 @@
         <button id="screenShot" class="button" onclick="saveTreeToPng()">SavePng</button>
         <label for="heightSlider">H</label><input type="range" min="1" max="9" value=5 class="slider" id="heightSlider">
         <label for="widthSlider">W</label><input type="range" min="1" max="9" value="3" class="slider" id="widthSlider">
-        <button id="showConfig" class="button" onclick="showConfig()">ShowCFG</button>
-        <textarea rows = 30 cols = 80 id="configFile"></textarea>
+        <button id="showConfig" class="button" onclick="showConfig()">Show/Hide CFG</button>
+        <form id="myform" action = "http://localhost:9999/cgi/call_create_tree.cgi" method="get"> <!-- on server it is action = create_tree.cgi-->
+            <textarea spellcheck="false" name="new_config_file" id="configFile" rows = "50" cols = "70"></textarea>
+            <input id="submit_button" type = "submit" value = "Generate New Tree"/>
+        </form>
+        <a href="help.html" id="help" target="_blank">Config Explanation</a>
     </div>
-    <div contenteditable="true" id="description"></div>
+    <div contenteditable="true" spellcheck="false" id="description"></div>
 
 </body>
 

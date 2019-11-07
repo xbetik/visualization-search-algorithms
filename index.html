@@ -3,18 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <title>Tree Algorithms</title>
-
 </head>
+<style>
+    .algorithm_list {
+        width: 250px;
+    }
+
+    .algorithm_list a {
+        background-color: #eee;
+        color: black;
+        display: block;
+        padding: 12px;
+        text-decoration: none;
+        border: 1px solid #555;
+        padding-left:20px;
+    }
+
+    .algorithm_list a:hover {
+        background-color: #ccc;
+    }
+
+    .algorithm_list a.active {
+        background-color: #4CAF50;
+        color: white;
+    }
+</style>
 <body>
-    <form action = "script.cgi" method="get">
+    <div class="algorithm_list">
+        <p><b>General Search Strategies</b></p>
+        <a href="samples/backtracking.html" target="_blank">Backtracking</a>
+        <a href="samples/forward_checking.html" target="_blank">Forward-Checking</a>
+        <a href="samples/arc_consistency.html" target="_blank">Full Look Ahead</a>
+        <a href="samples/gaschnig.html" target="_blank">Gaschnig Backjumping</a>
+        <a href="samples/cbj.html" target="_blank">Conflict-Directed backjumping</a>
+    </div>
+
+    <div class="algorithm_list">
+        <p><b>Incomplete Tree Search Strategies</b></p>
+        <a href="samples/dfs.html" target="_blank">Depth first search</a>
+        <a href="samples/bbs.html" target="_blank">Bounded-backtrack search</a>
+        <a href="samples/dbs.html" target="_blank">Depth-bounded search</a>
+        <a href="samples/cs.html" target="_blank">Credit search</a>
+        <a href="samples/ib.html" target="_blank">Iterative broadening</a>
+        <a href="samples/lds.html" target="_blank">Limited discrepancy search</a>
+    </div>
+
+    <p><b>Solve particular problem</b></p>
+    <form action = "http://localhost:9999/cgi/script.cgi" onsubmit="return validateForm()" method="get" target="_blank" name="myForm">
         <select name="algorithm">
             <option value="1">Backtracking</option>
-            <option value="2">Look-ahead</option>
-        </select>
+            <option value="2">Forward-Checking</option>
+            <option value="3">Full Look-ahead</option>
+            <!--<option value="4">Gaschnig Backjumping</option>-->
+            </select>
         Domains: <input type = "text" name = "domains" value = '{"A" : {1,2,3}, "B" : {1,2,3}, "C" : {1,2,3}}' style="width:300px"/>
-        Constraints: <input type = "text" name = "constraints" value = "A>B" style="width:300px"/>
-        <input type = "submit" value = "Submit"/>
+        Constraints: <input type = "text" name = "constraints" value = "A>B,B>C" style="width:300px"/>
+        <input type = "submit" value = "Solve"/>
     </form>
+    <em>(Please follow the template syntax.)</em>
+    
+    <!--
+    <p><b>Try incomplete tree search strategies with different input values</b></p>
+    <form action = "http://localhost:9999/cgi/script.cgi" onsubmit="return validateForm()" method="get" target="_blank" name="myForm">
+        <select name="algorithm">
+            <option value="dfs">Depth First Search</option>
+            <option value="dbs">Depth-bounded-search</option>
+            <option value="cs">Credit search</option>
+        </select>
+        Value(e.g.DFS(2)) : <input type = "text" name = "value" value = "1" style="width:300px"/>
+        <input type = "submit" value = "Solve"/>
+    </form>-->
+    <address style= "padding-top:100px">
+        In case you have any questions, ideas or improvements please contact me at andrej.betik@gmail.com
+    </address>
 
+    <script>
+        function validateDomain(domain) {
+            // outer validation
+            var outer_patt = new RegExp("^{.*}\\s*}$");
+            if (outer_patt.test(domain)) {
+                // intern validation
+                domain = domain.substring(1); // cut the beginning
+                domain = domain.substring(0, domain.length - 1); // cut the end
+
+                var split_patt = new RegExp("}\\s*,\\s*","g");
+                domain = domain.replace(split_patt, "},,");
+                var arr = domain.split(",,");
+
+                var valid_ok = true;
+                for(var i=0; i<arr.length; i++) {
+                    var internal_patt = new RegExp("^\"[A-Za-z0-9]\"\\s*:\\s*{\\s*[0-9a-zA-Z][\\s*,0-9a-zA-Z]*}\\s*$");
+                    if (!internal_patt.test(arr[i])) {
+                        valid_ok = false;
+                        break;
+                    }
+                }
+                if (valid_ok) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function validateConstraints(constraints) {
+            let constraint_pattern = /[A-Za-z]+[0-9]*/g;
+            constraints = constraints.replace(constraint_pattern, "0");
+            try {
+                eval(constraints);
+                return true;
+            } catch (e) {
+                alert("Constraints contain syntax error\nHint:use python operators, eg. == instead of =");
+                return false;
+            }
+        }
+        function validateForm() {
+            let domains = document.forms["myForm"]["domains"].value;
+            let constraints = document.forms["myForm"]["constraints"].value;
+            if (!validateDomain(domains)) {
+                alert("Domains contain syntax error, follow the example syntax")
+                return false;
+            }
+            return validateConstraints(constraints);
+        }
+    </script>
 </body>
 </html>

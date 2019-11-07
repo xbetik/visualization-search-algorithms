@@ -1,4 +1,427 @@
-const padding_x = 250;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Visualization of Search Algorithms</title>
+    <script src = "https://d3js.org/d3.v3.js"></script>
+    <script src = "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js"></script>
+    <script src = "html2canvas.min.js"></script>
+</head>
+
+<body>
+    <div id="button-wrapper" data-html2canvas-ignore="true">
+        <button id="showTree" class="button" onclick="showTree()">Show Solution</button>
+        <button id="animation" class="button" onclick="animation()">Animation</button>
+        <button id="step" class="button" onclick="step()">Step</button>
+        <button id="stepBack" class="button" onclick="stepBack()">StepBack</button>
+        <button id="reset" class="button" onclick="reset()">Reset</button>
+        <button id="screenShot" class="button" onclick="saveTreeToPng()">SavePng</button>
+        <label for="heightSlider">H</label><input type="range" min="1" max="9" value=5 class="slider" id="heightSlider">
+        <label for="widthSlider">W</label><input type="range" min="1" max="9" value="3" class="slider" id="widthSlider">
+        <button id="showConfig" class="button" onclick="showConfig()">Show/Hide CFG</button>
+        <form id="myform" action = "http://localhost:9999/cgi/call_create_tree.cgi" method="get"> <!-- on server it is action = create_tree.cgi-->
+            <textarea spellcheck="false" name="new_config_file" id="configFile" rows = "50" cols = "70"></textarea>
+            <input id="submit_button" type = "submit" value = "Generate New Tree"/>
+        </form>
+        <a href="help.html" id="help" target="_blank">Config Explanation</a>
+    </div>
+    <div contenteditable="true" spellcheck="false" id="description"></div>
+
+</body>
+
+
+<style>
+table {
+    display : block;
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+}
+
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+}
+
+.button {
+    -webkit-tap-highlight-color: transparent;
+    border:none;
+    color: black;
+    padding: 8px 4px;
+    min-width: 96px;
+    text-align: center;
+    display: inline-block;
+    font-family:monospace;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 20px;
+}
+.slider {
+    -webkit-appearance: none;
+    width: 10%;
+    height: 10px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+}
+
+.slider:hover {
+    opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    background: #4CAF50;
+    cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    background: #4CAF50;
+    cursor: pointer;
+}
+
+#description {
+    display : block;
+    position : absolute;
+    background : transparent;
+    padding : 10px;
+    width: 1000px;
+    height: 55px;
+    /*font-size:large;
+    font-weight: bold;*/
+    font-family:Times, "Times New Roman", serif;
+}
+
+#myform {
+    display: inline;
+    background : transparent;
+    border-color : transparent;
+    border-style : none;
+    visibility : hidden;
+}
+
+#submit_button {
+    position:absolute;
+    color: black;
+    min-width: 96px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-family:monospace;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 20px;
+}
+
+#help {
+    position:absolute;
+    background-color: #f44336;
+    color: white;
+    margin-left: 300px;
+    padding: 5px 75px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    visibility:hidden;
+}
+
+#configFile {
+    display:inline-block;
+    position: absolute;
+    margin-top:30px;
+}
+
+    #description { font-size : 16px; }
+    .level { font-size : 20px; }
+    .sideLabels, .label1, .nodeName, .edgeLabelsLeft, .edgeLabelsRight { font-size : 16px; }
+</style>
+<script>
+var labels = ["V1","V2","V3"];
+var treeData = {
+ "name" : "",
+ "nodeOrder" : 1,
+ "children" : [
+ {
+  "name" : "1",
+  "nodeOrder" : 2,
+  "children" : [
+  {
+   "name" : "1",
+   "nodeOrder" : 3,
+   "children" : [
+   {
+    "name" : "1",
+    "nodeOrder" : 4,
+    "shape" : "rectangle",
+    "nodeColor" : "red",
+    "label1" : "(c1)"   
+},
+   {
+    "name" : "2",
+    "nodeOrder" : 5,
+    "shape" : "rectangle",
+    "nodeColor" : "red",
+    "label1" : "(c1)"   
+},
+   {
+    "name" : "3",
+    "nodeOrder" : 6,
+    "shape" : "rectangle",
+    "nodeColor" : "red",
+    "label1" : "(c1)"   
+}   
+]
+  
+},
+  {
+   "name" : "2",
+   "nodeOrder" : 7,
+   "children" : [
+   {
+    "name" : "1",
+    "nodeOrder" : 8,
+    "shape" : "rectangle",
+    "nodeColor" : "red",
+    "label1" : "(c1)"   
+},
+   {
+    "name" : "2",
+    "nodeOrder" : 9,
+    "shape" : "rectangle",
+    "nodeColor" : "red",
+    "label1" : "(c1)"   
+},
+   {
+    "name" : "3",
+    "nodeOrder" : 10,
+    "shape" : "rectangle",
+    "nodeColor" : "red",
+    "label1" : "(c1)"   
+}   
+]
+  
+},
+  {
+   "name" : "3",
+   "nodeOrder" : 11,
+   "children" : [
+   {
+    "name" : "1",
+    "nodeOrder" : 12,
+    "shape" : "rectangle",
+    "nodeColor" : "red",
+    "label1" : "(c1)"   
+},
+   {
+    "name" : "2",
+    "nodeOrder" : 13,
+    "shape" : "rectangle",
+    "nodeColor" : "red",
+    "label1" : "(c1)"   
+},
+   {
+    "name" : "3",
+    "nodeOrder" : 14,
+    "shape" : "rectangle",
+    "nodeColor" : "red",
+    "label1" : "(c1)"   
+}   
+]
+  
+}  
+]
+ 
+},
+ {
+  "name" : "2",
+  "nodeOrder" : 15,
+  "children" : [
+  {
+   "name" : "1",
+   "nodeOrder" : 16,
+   "children" : [
+   {
+    "name" : "1",
+    "nodeOrder" : 17,
+    "shape" : "rectangle",
+    "nodeColor" : "red",
+    "label1" : "(c1)"   
+},
+   {
+    "name" : "2",
+    "nodeOrder" : 18,
+    "shape" : "rectangle",
+    "nodeColor" : "red",
+    "label1" : "(c1)"   
+},
+   {
+    "name" : "3",
+    "nodeOrder" : 19,
+    "shape" : "rectangle",
+    "nodeColor" : "red",
+    "label1" : "(c1)"   
+}   
+]
+  
+},
+  {
+   "name" : "2",
+   "nodeOrder" : 20,
+   "children" : [
+   {
+    "name" : "1",
+    "nodeOrder" : 21,
+    "shape" : "rectangle",
+    "nodeColor" : "red",
+    "label1" : "(c1)"   
+},
+   {
+    "name" : "2",
+    "nodeOrder" : 22,
+    "shape" : "rectangle",
+    "nodeColor" : "red",
+    "label1" : "(c1)"   
+},
+   {
+    "name" : "3",
+    "nodeOrder" : 23,
+    "shape" : "rectangle",
+    "nodeColor" : "red",
+    "label1" : "(c1)"   
+}   
+]
+  
+},
+  {
+   "name" : "3",
+   "nodeOrder" : 24,
+   "children" : [
+   {
+    "name" : "1",
+    "nodeOrder" : 25,
+    "shape" : "rectangle",
+    "nodeColor" : "red",
+    "label1" : "(c1)"   
+},
+   {
+    "name" : "2",
+    "nodeOrder" : 26,
+    "shape" : "rectangle",
+    "nodeColor" : "red",
+    "label1" : "(c1)"   
+},
+   {
+    "name" : "3",
+    "nodeOrder" : 27,
+    "shape" : "rectangle",
+    "nodeColor" : "red",
+    "label1" : "(c1)"   
+}   
+]
+  
+}  
+]
+ 
+},
+ {
+  "name" : "3",
+  "nodeOrder" : 28,
+  "children" : [
+  {
+   "name" : "1",
+   "nodeOrder" : 29,
+   "children" : [
+   {
+    "name" : "1",
+    "nodeOrder" : 30,
+    "nodeColor" : "blank"   
+},
+   {
+    "name" : "2",
+    "nodeOrder" : 31,
+    "shape" : "rectangle",
+    "nodeColor" : "red",
+    "label1" : "(c1)"   
+},
+   {
+    "name" : "3",
+    "nodeOrder" : 32,
+    "shape" : "rectangle",
+    "nodeColor" : "red",
+    "label1" : "(c1)"   
+}   
+]
+  
+},
+  {
+   "name" : "2",
+   "nodeOrder" : 33,
+   "children" : [
+   {
+    "name" : "1",
+    "nodeOrder" : 34,
+    "nodeColor" : "blank"   
+},
+   {
+    "name" : "2",
+    "nodeOrder" : 35,
+    "shape" : "rectangle",
+    "nodeColor" : "red",
+    "label1" : "(c1)"   
+},
+   {
+    "name" : "3",
+    "nodeOrder" : 36,
+    "shape" : "rectangle",
+    "nodeColor" : "red",
+    "label1" : "(c1)"   
+}   
+]
+  
+},
+  {
+   "name" : "3",
+   "nodeOrder" : 37,
+   "children" : [
+   {
+    "name" : "1",
+    "nodeOrder" : 38,
+    "nodeColor" : "blank"   
+},
+   {
+    "name" : "2",
+    "nodeOrder" : 39,
+    "shape" : "rectangle",
+    "nodeColor" : "red",
+    "label1" : "(c1)"   
+},
+   {
+    "name" : "3",
+    "nodeOrder" : 40,
+    "shape" : "rectangle",
+    "nodeColor" : "red",
+    "label1" : "(c1)"   
+}   
+]
+  
+}  
+]
+ 
+} 
+]
+};
+const node_size=400;
+const stroke_width=1.5;
+let show_frame=false;
+const padding_x = 200;
 const padding_y = 90;
 const most_right_label_padding = 150;
 const most_down_label_padding = 50;
@@ -53,13 +476,6 @@ function init() {
     }
 }
 
-function jumpDirection(source_index, target_index) {
-    if (getNode(source_index).x < getNode(target_index).x) {
-        return -100;
-    }
-    return 100;
-}
-
 function addJumps(svg) {
     var lineFunction = d3.svg.line()
         .x(function(d) { return d.x; })
@@ -75,9 +491,8 @@ function addJumps(svg) {
                 .attr("fill", "none")
                 .attr("stroke", "black")
                 .attr("d", lineFunction([
-
                     { "x" : getNode(nodes[i].nodeOrder).x, "y" : getNode(nodes[i].nodeOrder).y-10 },
-                    { "x" : getNode(nodes[i].jump).x+jumpDirection(nodes[i].nodeOrder, nodes[i].jump), "y" : y},
+                    { "x" : getNode(nodes[i].jump).x-80, "y" : y},
                     { "x" : getNode(nodes[i].jump).x, "y" : getNode(nodes[i].jump).y }
                 ]))
                 .attr("transform", "translate(" + padding_x + "," + padding_y + ")")
@@ -264,10 +679,8 @@ function addNodeName(node) {
         .attr("visibility", "hidden")
         .style("fill", function(d) { return typeof d.nodeColor === "undefined" ? "white" : "black" })
         .attr({
-            "text-anchor" : "middle",
-            "y" : 6,
-            //"y" : 5,
-            //"x" : -4,
+            "y" : 5,
+            "x" : -4,
             "font-weight" : "bold"
         });
 }
@@ -582,3 +995,7 @@ function showConfig() {
         cfg_shown = true;
     }
 }
+document.getElementById("description").innerHTML = "<p><strong>BACKTRACKING</strong></p><table><tr><th>Variable</th><th>Domain</th></tr><tr><td>V1</td><td>{ 1 2 3 }</td></tr><tr><td>V2</td><td>{ 1 2 3 }</td></tr><tr><td>V3</td><td>{ 1 2 3 }</td></tr><tr><th>Constraints</th></tr><tr><td>c1 : V1==3*V3</td></tr></table>";
+document.getElementById("configFile").value = "#BACKTRACKING\n#V1 1 2 3,V2 1 2 3,V3 1 2 3\n#c1 : V1==3*V3\n#description_size=16,node_size=400,edge_size=1.5,variable_label_size=20,node_label_size=16,show_frame=false,colored_limit=none\npath:=r0;name:=none;order:=1\npath:=r0V11;name:=1;order:=2\npath:=r0V11V21;name:=1;order:=3\npath:=r0V11V21V31;name:=1;order:=4;shape:=square;color:=red;bottom_label:=(c1)\npath:=r0V11V21V32;name:=2;order:=5;shape:=square;color:=red;bottom_label:=(c1)\npath:=r0V11V21V33;name:=3;order:=6;shape:=square;color:=red;bottom_label:=(c1)\npath:=r0V11V22;name:=2;order:=7\npath:=r0V11V22V31;name:=1;order:=8;shape:=square;color:=red;bottom_label:=(c1)\npath:=r0V11V22V32;name:=2;order:=9;shape:=square;color:=red;bottom_label:=(c1)\npath:=r0V11V22V33;name:=3;order:=10;shape:=square;color:=red;bottom_label:=(c1)\npath:=r0V11V23;name:=3;order:=11\npath:=r0V11V23V31;name:=1;order:=12;shape:=square;color:=red;bottom_label:=(c1)\npath:=r0V11V23V32;name:=2;order:=13;shape:=square;color:=red;bottom_label:=(c1)\npath:=r0V11V23V33;name:=3;order:=14;shape:=square;color:=red;bottom_label:=(c1)\npath:=r0V12;name:=2;order:=15\npath:=r0V12V21;name:=1;order:=16\npath:=r0V12V21V31;name:=1;order:=17;shape:=square;color:=red;bottom_label:=(c1)\npath:=r0V12V21V32;name:=2;order:=18;shape:=square;color:=red;bottom_label:=(c1)\npath:=r0V12V21V33;name:=3;order:=19;shape:=square;color:=red;bottom_label:=(c1)\npath:=r0V12V22;name:=2;order:=20\npath:=r0V12V22V31;name:=1;order:=21;shape:=square;color:=red;bottom_label:=(c1)\npath:=r0V12V22V32;name:=2;order:=22;shape:=square;color:=red;bottom_label:=(c1)\npath:=r0V12V22V33;name:=3;order:=23;shape:=square;color:=red;bottom_label:=(c1)\npath:=r0V12V23;name:=3;order:=24\npath:=r0V12V23V31;name:=1;order:=25;shape:=square;color:=red;bottom_label:=(c1)\npath:=r0V12V23V32;name:=2;order:=26;shape:=square;color:=red;bottom_label:=(c1)\npath:=r0V12V23V33;name:=3;order:=27;shape:=square;color:=red;bottom_label:=(c1)\npath:=r0V13;name:=3;order:=28\npath:=r0V13V21;name:=1;order:=29\npath:=r0V13V21V31;name:=1;order:=30;color:=blank\npath:=r0V13V21V32;name:=2;order:=31;shape:=square;color:=red;bottom_label:=(c1)\npath:=r0V13V21V33;name:=3;order:=32;shape:=square;color:=red;bottom_label:=(c1)\npath:=r0V13V22;name:=2;order:=33\npath:=r0V13V22V31;name:=1;order:=34;color:=blank\npath:=r0V13V22V32;name:=2;order:=35;shape:=square;color:=red;bottom_label:=(c1)\npath:=r0V13V22V33;name:=3;order:=36;shape:=square;color:=red;bottom_label:=(c1)\npath:=r0V13V23;name:=3;order:=37\npath:=r0V13V23V31;name:=1;order:=38;color:=blank\npath:=r0V13V23V32;name:=2;order:=39;shape:=square;color:=red;bottom_label:=(c1)\npath:=r0V13V23V33;name:=3;order:=40;shape:=square;color:=red;bottom_label:=(c1)";
+</script>
+</html>

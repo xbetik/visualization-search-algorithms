@@ -10,17 +10,18 @@ td, th {
 }
 
 .button {
-    border: outset;
+    -webkit-tap-highlight-color: transparent;
+    border:none;
     color: black;
     padding: 8px 4px;
     min-width: 96px;
     text-align: center;
-    text-decoration: none;
     display: inline-block;
     font-family:monospace;
     font-size: 16px;
     margin: 4px 2px;
     cursor: pointer;
+    border-radius: 20px;
 }
 .slider {
     -webkit-appearance: none;
@@ -64,3 +65,44 @@ td, th {
     font-weight: bold;*/
     font-family:Times, "Times New Roman", serif;
 }
+
+#myform {
+    display: inline;
+    background : transparent;
+    border-color : transparent;
+    border-style : none;
+    visibility : hidden;
+}
+
+#submit_button {
+    position:absolute;
+    color: black;
+    min-width: 96px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-family:monospace;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 20px;
+}
+
+#help {
+    position:absolute;
+    background-color: #f44336;
+    color: white;
+    margin-left: 300px;
+    padding: 5px 75px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    visibility:hidden;
+}
+
+#configFile {
+    display:inline-block;
+    position: absolute;
+    margin-top:30px;
+}
+
