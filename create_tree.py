@@ -77,8 +77,8 @@ def parse_size_options(size_options):
 
 def set_style_size_options(f, description, variable_label, node_label):
     f.write("    #description { font-size : " + description + "px; }\n")
-    f.write("    .level { font-size : " + variable_label + "px; }\n")
-    f.write("    .sideLabels, .label1, .nodeName, .edgeLabelsLeft, .edgeLabelsRight { font-size : " + node_label + "px; }\n")
+    f.write("    .domain_label { font-size : " + variable_label + "px; }\n")
+    f.write("    .sideLabels, .nodeLabel, .nodeName, .edgeLabelsLeft, .edgeLabelsRight { font-size : " + node_label + "px; }\n")
     f.write("</style>\n")
 
 def add_html(output_file):
@@ -187,7 +187,7 @@ def add_javascript(output_file, root, info, size_options, config_str):
             f.write(mGap(gap) + '"dashLine" : ' + '"' + "yes" + '"')
         if node.bottom_label != None:
             f.write(",\n")
-            f.write(mGap(gap) + '"label1" : ' + '"' + node.bottom_label + '"')
+            f.write(mGap(gap) + '"nodeLabel" : ' + '"' + node.bottom_label + '"')
         if node.side_label != None:
             f.write(",\n")
             writeToMultipleLabel(node.side_label, f, gap)

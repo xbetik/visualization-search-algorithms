@@ -10,8 +10,7 @@ let animationOn = false;
 let nodes;
 let links;
 let nodeGap = 0;
-let counter = 1;
-let jumpOn = false;
+let counter = 0;
 let cfg_shown = false;
 
 init();
@@ -30,6 +29,8 @@ function init() {
 
     nodes = tree.nodes(treeData);
     links = getLinks();
+    // Normalize the depth
+    nodes.forEach(function(d) { d.y = d.depth * tree_height; });
 
     addTreeLabel(canvas);
     addMarkers(svg);
@@ -42,15 +43,7 @@ function init() {
     addBottomLabel(node);
     addSideLabels();
     addJumps(svg);
-    if (show_frame) {
-        for (let i = counter; i <= nodes.length; i++) {
-            jumpOn = true;
-            showFrameOnly(i);
-        treeRevealed = true;
-        counter = 1;
-        jumpOn = false;
-        }
-    }
+    showFrame();
 }
 
 function jumpDirection(source_index, target_index) {
@@ -70,12 +63,11 @@ function addJumps(svg) {
         var y = getNode(nodes[i].nodeOrder).y - ((getNode(nodes[i].nodeOrder).y-getNode(nodes[i].jump).y)/2);
         if (typeof nodes[i].jump !== "undefined") {
             svg.append("path")
-                .attr("id", "jump-" + nodes[i].nodeOrder)
+                .attr("id", "jump-" + (nodes[i].nodeOrder-1))
                 .attr("stroke-width", "3px")
                 .attr("fill", "none")
                 .attr("stroke", "black")
                 .attr("d", lineFunction([
-
                     { "x" : getNode(nodes[i].nodeOrder).x, "y" : getNode(nodes[i].nodeOrder).y-10 },
                     { "x" : getNode(nodes[i].jump).x+jumpDirection(nodes[i].nodeOrder, nodes[i].jump), "y" : y},
                     { "x" : getNode(nodes[i].jump).x, "y" : getNode(nodes[i].jump).y }
@@ -96,6 +88,7 @@ function getNode(index) {
     }
     return -1;
 }
+
 
 function getLinks() {
     let links = [];
@@ -234,7 +227,7 @@ function addLeftEdgeLabels(canvas) {
 function addNodes(canvas) {
     let id_counter = 0;
     let node = canvas.selectAll(".node")
-        .data(nodes, function (d) { return d.id = nodes[id_counter++].nodeOrder; })
+        .data(nodes, function (d) { return d.id = nodes[id_counter++].nodeOrder-1; })
         .enter()
         .append("g")
         .attr("id", function(d) { return "g-node-" +d.id})
@@ -266,16 +259,14 @@ function addNodeName(node) {
         .attr({
             "text-anchor" : "middle",
             "y" : 6,
-            //"y" : 5,
-            //"x" : -4,
             "font-weight" : "bold"
         });
 }
 
 function addBottomLabel(node) {
     node.append("text")
-        .attr("class", "label1")
-        .text(function(d) { return d.label1; })
+        .attr("class", "nodeLabel")
+        .text(function(d) { return d.nodeLabel; })
         .attr({
             "id" : function(d) { return "nodeLabel1-"+d.id; },
             "visibility" : "hidden",
@@ -285,17 +276,13 @@ function addBottomLabel(node) {
         });
 }
 
-/*
-Because of the fact that doing node.append("text") I cannot append more than one text element i had to do external
-function which uses original "nodes" data and nodeOrder as a transformation index to current node elements
- */
 function addSideLabels() {
     for(let i=0;i<nodes.length;i++) {
         if (typeof nodes[i].sideLabels !== "undefined") {
             for(let j=0; j<nodes[i].sideLabels.length; j++) {
-                d3.select("#g-node-" + nodes[i].nodeOrder)
+                d3.select("#g-node-" + (nodes[i].nodeOrder-1))
                     .append("text")
-                    .attr("id","sideLabel-"+nodes[i].nodeOrder)
+                    .attr("id","sideLabel-"+ (nodes[i].nodeOrder-1))
                     .attr("class", "sideLabels")
                     .attr("visibility", "hidden")
                     .text(nodes[i].sideLabels[j])
@@ -307,6 +294,29 @@ function addSideLabels() {
             }
         }
     }
+}
+
+function addTreeLabel(canvas) {
+    let level = 1;
+    let domain_labels = canvas.append("g")
+        .attr("class", "domain_labels")
+        .selectAll("domain_labels")
+        .data(labels)
+        .enter()
+        .append("g")
+        .attr("class", "domain_label")
+        .attr("transform", function(d) {
+            return "translate(" + -20 + "," + level++*tree_height + ")";
+        });
+    level = 1;
+    domain_labels.append("text")
+        .text(function(d) { return d})
+        .attr({
+            "id" : function(d) { return "treeLabel-" + level++; },
+            "visibility" : "hidden",
+            "font-weight" : "bold",
+            "font-family" : "monospace"
+        });
 }
 
 function reveal(element) {
@@ -326,99 +336,79 @@ function hideAll(element) {
 }
 
 function revealBackJump(i) {
-    if (typeof getNode(i).jump !== "undefined") {
-        if (jumpOn) {
-            if (treeRevealed) {
-                d3.select("#jump-"+i).attr("stroke", "red")
-            }
-            else {
-                reveal("#jump-"+i);
-            }
-            jumpOn = false;
+    if (typeof nodes[i].jump !== "undefined") {
+        if (treeRevealed) {
+            d3.select("#jump-"+i).attr("stroke", "red");
         }
         else {
-            jumpOn = true;
-            counter--;
+            reveal("#jump-"+i);
         }
     }
 }
 
 function hideBackJump(i) {
-    if (typeof getNode(i).jump !== "undefined") {
-        if (!jumpOn) {
-            if (treeRevealed) {
-                d3.select("#jump-"+i).attr("stroke", "black")
-            }
-            else {
-                hide("#jump-"+i);
-            }
-            jumpOn = true;
-            counter++;
+    if (typeof nodes[i].jump !== "undefined") {
+        if (treeRevealed) {
+            d3.select("#jump-"+i).attr("stroke", "black")
         }
         else {
-            jumpOn = false;
+            hide("#jump-"+i);
         }
     }
 }
 
-function showFrameOnly(i) {
-    reveal("#link-" + (i - 1));
-    reveal("#node-" + i);
-    let node = getNode(i);
-    if (node !== -1) {
-        reveal("#treeLabel-" + (node.depth - 1));
+function showFrame() {
+    if (show_frame) {
+        for (let i = 0; i < nodes.length; i++) {
+            reveal("#node-" + i);
+            reveal("#link-" + i);
+            reveal("#treeLabel-" + nodes[i].depth);
+            revealBackJump(i);
+        }
+        counter = 1;
+        treeRevealed = true;
     }
-    revealBackJump(i)
 }
 
 function showNode(i) {
     if(treeRevealed) {
         if (typeof coloredLimit === "undefined" || i < coloredLimit+1) {
             if (show_frame) {
-                reveal("#text-"+ (i+1));
-                reveal("#nodeLabel1-"+ (i+1));
+                reveal("#text-"+ (i));
+                reveal("#nodeLabel1-"+ (i));
                 reveal("#edgeLabelLeft-" + i);
                 reveal("#edgeLabelRight-"+ i);
-                revealAll("#sideLabel-"+ (i+1));
+                revealAll("#sideLabel-"+ (i));
             }
             d3.select("#link-" + i)
                 .attr("stroke", "red")
                 .attr("stroke-width", stroke_width*2);
-            revealBackJump(i+1); // nodes reveals 1-time faster than links
         }
     }
     else {
-        reveal("#link-" + (i-1));
-        reveal("#edgeLabelLeft-" + (i-1));
-        reveal("#edgeLabelRight-"+ (i-1));
+        reveal("#link-" + i);
+        reveal("#edgeLabelLeft-" + i);
+        reveal("#edgeLabelRight-"+ i);
         reveal("#node-"+ i);
         reveal("#text-"+ i);
         reveal("#nodeLabel1-"+ i);
         reveal("#nodeLabel2-"+ i);
         revealAll("#sideLabel-"+ i);
-
-        let node = getNode(i);
-        if (node !== -1) {
-            reveal("#treeLabel-" + (node.depth-1));
-        }
-        revealBackJump(i)
+        reveal("#treeLabel-" + nodes[i].depth);
     }
+    revealBackJump(i);
 }
 
 function hideNode(i) {
     if(treeRevealed) {
-        hideBackJump(i+1);
-        i = counter;
         d3.select("#link-" + i)
             .attr("stroke", "black")
             .attr("stroke-width", stroke_width);
     }
     else {
-        hideBackJump(i);
-        i = counter;
-        hide("#link-" + (i-1));
-        hide("#edgeLabelLeft-" + (i-1));
-        hide("#edgeLabelRight-"+ (i-1));
+        hide("#link-" + i);
+        hide("#edgeLabelLeft-" + i);
+        hide("#edgeLabelRight-"+ i);
         hide("#node-"+ i);
         hide("#text-"+ i);
         hide("#nodeLabel1-"+ i);
@@ -426,46 +416,37 @@ function hideNode(i) {
         hideAll("#sideLabel-"+ i);
         hide("#jump-"+i)
     }
+    hideBackJump(i);
+}
+
+function checkColorLimit() {
+    if (show_frame) {
+        return counter < coloredLimit+1;
+    }
+    return true;
 }
 
 function showTree() {
     if (animationOn) {
         pause();
     }
-    for (let i = counter; i<=nodes.length; i++) {
-        jumpOn = true;
-        showNode(i);
+    for (counter; counter<nodes.length && checkColorLimit(); counter++) {
+        showNode(counter);
+    }
+    if (!treeRevealed) {
+        counter = 1;
     }
     treeRevealed = true;
-    counter = 1;
-    jumpOn = false;
 }
 
 function step() {
     if (animationOn) {
         pause();
     }
-    if(counter <= nodes.length) {
+    if(counter < nodes.length && checkColorLimit()) {
         showNode(counter);
         counter++;
     }
-}
-
-function stepBack() {
-    if (animationOn) {
-        pause();
-    }
-    if(counter > 1) {
-        counter--;
-        hideNode(counter);
-    }
-}
-
-function pause() {
-    document.getElementById("animation").innerHTML = "Animation";
-    document.getElementById("animation").style.backgroundColor = "";
-    clearInterval(interval);
-    animationOn = false;
 }
 
 function timeNodes() {
@@ -473,7 +454,7 @@ function timeNodes() {
         pause();
     }
     else {
-        if(counter <= nodes.length) {
+        if(counter < nodes.length && checkColorLimit()) {
             showNode(counter);
             counter++;
         }
@@ -497,57 +478,52 @@ function animation() {
     }
 }
 
-function addTreeLabel(canvas) {
-    nodes.forEach(function(d) { d.y = d.depth * tree_height; });
-    let depthHash = _.uniq(_.pluck(nodes, "depth")).sort();
-    depthHash.shift();
-    let levelSVG = canvas.append("g")
-        .attr("class", "levels-svg");
-    levelSVG.selectAll("g.level")
-        .data(depthHash)
-        .enter()
-        .append("g")
-        .attr("class", "level")
-        .attr("transform", function(d) { return "translate(" + -20 + "," + d*tree_height + ")"; })
-        .append("text")
-        .text(function(d){ return labels[d-1]; })
-        .attr({
-            "id" : function(d) { return "treeLabel-" + (d-1); },
-            "visibility" : "hidden",
-            "font-weight" : "bold",
-            //"font-size" : "30px",
-            "font-family" : "monospace"
-        });
+function stepBack() {
+    if (animationOn) {
+        pause();
+    }
+    if(counter > 1) {
+        counter--;
+        hideNode(counter);
+    }
+}
+
+function pause() {
+    document.getElementById("animation").innerHTML = "Animation";
+    document.getElementById("animation").style.backgroundColor = "";
+    clearInterval(interval);
+    animationOn = false;
 }
 
 function reset() {
     if (animationOn) {
         pause();
     }
+    counter = 0;
+    treeRevealed = false;
     d3.selectAll("svg").remove();
-    show_frame = false;
     init();
     nodeGap = 0;
-    counter = 1;
-    treeRevealed = false;
+    console.log(counter);
     animationOn = false;
 }
 
-function restoreTree(restoreUntil) {
-    for(let i=1; i < restoreUntil; i++) {
+function restoreUntil(startFrom, restoreLimit) {
+    for(let i = startFrom; i < restoreLimit; i++) {
         step();
     }
 }
 
 function restore() {
-    let restoreUntil = counter;
+    let restoreLimit = counter;
     let wasRevealed = treeRevealed;
     reset();
     if(wasRevealed) {
         showTree();
+        restoreUntil(1, restoreLimit);
     }
     else {
-        restoreTree(restoreUntil);
+        restoreUntil(0, restoreLimit);
     }
 }
 

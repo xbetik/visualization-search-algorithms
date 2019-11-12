@@ -92,7 +92,7 @@
 
                 var valid_ok = true;
                 for(var i=0; i<arr.length; i++) {
-                    var internal_patt = new RegExp("^\"[A-Za-z0-9]\"\\s*:\\s*{\\s*[0-9a-zA-Z][\\s*,0-9a-zA-Z]*}\\s*$");
+                    var internal_patt = new RegExp("^\"[A-Za-z0-9]*\"\\s*:\\s*{\\s*[0-9a-zA-Z][\\s*,0-9a-zA-Z]*}\\s*$");
                     if (!internal_patt.test(arr[i])) {
                         valid_ok = false;
                         break;

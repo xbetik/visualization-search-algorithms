@@ -21,7 +21,8 @@
         <label for="heightSlider">H</label><input type="range" min="1" max="9" value=5 class="slider" id="heightSlider">
         <label for="widthSlider">W</label><input type="range" min="1" max="9" value="3" class="slider" id="widthSlider">
         <button id="showConfig" class="button" onclick="showConfig()">Show/Hide CFG</button>
-        <form id="myform" action = "http://localhost:9999/cgi/call_create_tree.cgi" method="get"> <!-- on server it is action = create_tree.cgi-->
+        <form id="myform" action = "http://localhost:9999/cgi/call_create_tree.cgi" method="get">
+        <!--<form id="myform" action = "call_create_tree.cgi" method="get">-->
             <textarea spellcheck="false" name="new_config_file" id="configFile" rows = "50" cols = "70"></textarea>
             <input id="submit_button" type = "submit" value = "Generate New Tree"/>
         </form>

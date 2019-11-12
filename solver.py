@@ -161,6 +161,8 @@ def revise(constraints, dom_name1, values1, dom_name2, values2, inconsistent_con
 
 def reviseAll(domains, constraints, name, value, d_behavior):
     domain_queue = [(name, [value])]
+    for d in domains.items():
+        domain_queue.append((d[0], d[1]))
     while domain_queue:
         name, values = domain_queue.pop(0)
         for d in list(domains.items()):

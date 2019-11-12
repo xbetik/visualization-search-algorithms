@@ -10,12 +10,8 @@ def printHtml():
         print(line)
     f.close()
 
-# Uncomment if input comes from website
-
 form = cgi.FieldStorage()
 algorithm = form.getvalue('algorithm')
-#algorithm = "dfs"
- 
 if algorithm.isdigit():
     domains = form.getvalue('domains')
     constraints = form.getvalue('constraints')
@@ -34,8 +30,9 @@ else:
     printHtml()
 
 '''
-algorithm = '2'
-domains = '{"D1" : {1,2,3,4}, "D2" : {1,2,3}, "D3" : {1,2,3}}'
-constraints = 'D1>D3,D2==3*D3'
+algorithm = '3'
+domains = '{"V1" : {1,2,3,4}, "V2" : {1,2,3}, "V3" : {1,2,3}}'
+constraints = 'V1>V2,V2==3*V3'
+config_str = solver.solve(algorithm, domains, constraints)
+create_tree.make_html(config_str, "output.html")
 '''
-
