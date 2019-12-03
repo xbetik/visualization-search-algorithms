@@ -24,14 +24,14 @@ def write_description(description_info):
             str_buff += ","
         str_buff += "c" + str(counter) + " : " + constraint
     str_buff+="\n"
-    str_buff+="#description_size=16,node_size=400,edge_size=1.5,variable_label_size=20,node_label_size=16,show_frame=false,colored_limit=none\n"
+    str_buff+="#description_size=16,node_size=400,edge_size=1.5,variable_label_size=20,node_label_size=16,show_frame=false,colored_limit=none,animation_speed=500\n"
     return str_buff
 
 def create_config(solution, nodes, description_info, jumps):
     ret_string = write_description(description_info)
-    ret_string += "path:=r0;name:=none;order:=1\n"
+    ret_string += "path:=R0;name:=none;order:=1\n"
     for i, node in enumerate(nodes, start=2):
-        partial_string = "path:=r0"
+        partial_string = "path:=R0"
         domains = node[0]
         node_name = None
         for domain in domains:

@@ -10,9 +10,12 @@ let animationOn = false;
 let nodes;
 let links;
 let nodeGap = 0;
-let counter = 0;
 let cfg_shown = false;
+let firstItem, lastItem;
+let counter;
+let node_size = 400,stroke_width=1.5,coloredLimit=null,show_frame=false,animation_speed=500;
 
+/* #AdditionalVariableTag. This tag marks the place where additional constants will be placed. DO NOT REMOVE IT */
 init();
 
 function init() {
@@ -22,6 +25,7 @@ function init() {
         "height" : padding_y + (tree_height*(labels.length+1)) + most_down_label_padding
     })
         .append("g")
+        .attr("class", "allObjects")
         .attr("transform", "translate(" + padding_x + "," + padding_y + ")");
 
     let tree = d3.layout.tree()
@@ -32,11 +36,14 @@ function init() {
     // Normalize the depth
     nodes.forEach(function(d) { d.y = d.depth * tree_height; });
 
+    firstItem = getFirstItem();
+    lastItem = getLastItem();
+    counter = firstItem;
+
     addTreeLabel(canvas);
     addMarkers(svg);
     addLinks(canvas);
-    addRightEdgeLabels(canvas);
-    addLeftEdgeLabels(canvas);
+    addEdgeLabels(canvas);
     let node = addNodes(canvas);
     addNodeShape(node);
     addNodeName(node);
@@ -46,11 +53,38 @@ function init() {
     showFrame();
 }
 
-function jumpDirection(source_index, target_index) {
-    if (getNode(source_index).x < getNode(target_index).x) {
-        return -100;
-    }
-    return 100;
+function getFirstItem() {
+    let min = 100;
+    nodes.forEach(function(d) {
+        if (typeof d.actionOrder !== "undefined") {
+            if (Math.min(d.nodeOrder, d.actionOrder) < min) {
+                min = Math.min(d.nodeOrder, d.actionOrder);
+            }
+        }
+        else {
+            if (d.nodeOrder < min) {
+                min = d.nodeOrder;
+            }
+        }
+    });
+    return min;
+}
+
+function getLastItem() {
+    let max = -1;
+    nodes.forEach(function(d) {
+        if (typeof d.actionOrder !== "undefined") {
+            if (Math.max(d.nodeOrder, d.actionOrder) > max) {
+                max = Math.max(d.nodeOrder, d.actionOrder);
+            }
+        }
+        else {
+            if (d.nodeOrder > max) {
+                max = d.nodeOrder;
+            }
+        }
+    });
+    return max;
 }
 
 function addJumps(svg) {
@@ -60,17 +94,22 @@ function addJumps(svg) {
         .interpolate("basis");
 
     for (let i = 0; i < nodes.length; i++) {
-        var y = getNode(nodes[i].nodeOrder).y - ((getNode(nodes[i].nodeOrder).y-getNode(nodes[i].jump).y)/2);
         if (typeof nodes[i].jump !== "undefined") {
+            let source_x = nodes[i].x;
+            let source_y = nodes[i].y;
+            let target_x = getNode(nodes[i].jump).x;
+            let target_y = getNode(nodes[i].jump).y;
             svg.append("path")
-                .attr("id", "jump-" + (nodes[i].nodeOrder-1))
+                .attr("id", function() {
+                    return typeof nodes[i].actionOrder !== "undefined" ? "jump-" + nodes[i].actionOrder : "jump-" + (nodes[i].nodeOrder+1);
+                })
                 .attr("stroke-width", "3px")
                 .attr("fill", "none")
                 .attr("stroke", "black")
                 .attr("d", lineFunction([
-                    { "x" : getNode(nodes[i].nodeOrder).x, "y" : getNode(nodes[i].nodeOrder).y-10 },
-                    { "x" : getNode(nodes[i].jump).x+jumpDirection(nodes[i].nodeOrder, nodes[i].jump), "y" : y},
-                    { "x" : getNode(nodes[i].jump).x, "y" : getNode(nodes[i].jump).y }
+                    { "x" : source_x, "y" : source_y-10 },
+                    { "x" : source_x+20, "y" : source_y - (source_y-target_y/2) + 100 },
+                    { "x" : target_x+(source_x<target_x ? -4 : 4), "y" : target_y }
                 ]))
                 .attr("transform", "translate(" + padding_x + "," + padding_y + ")")
                 .attr("visibility", "hidden")
@@ -80,23 +119,20 @@ function addJumps(svg) {
     }
 }
 
-function getNode(index) {
+function getNode(order) {
     for (let i=0;i<nodes.length;i++) {
-        if (nodes[i].nodeOrder === index) {
+        if (nodes[i].nodeOrder === order) {
             return nodes[i];
         }
     }
-    return -1;
+    return null;
 }
 
 
 function getLinks() {
     let links = [];
     for(let i=1; i < nodes.length; i++) {
-        let target = getNode(i+1);
-        if (target !== -1) {
-            links.push( { source : target.parent, target : target } );
-        }
+        links.push( { source : nodes[i].parent, target : nodes[i] } );
     }
     return links;
 }
@@ -132,13 +168,15 @@ function addMarkers(svg) {
 }
 
 function addLinks(canvas) {
-    let id_counter = 0;
-    canvas.selectAll(".link")
-        .data(links, function(d) { return d.id = ++id_counter; })
+    let i = 1;
+    let links_group = canvas.append("g")
+        .attr("class", "links");
+    links_group.selectAll(".link")
+        .data(links, function(d) { return d.id = nodes[i++].nodeOrder; })
         .enter()
         .append("line")
         .attr("class", "link")
-        .attr("id", function (d) { return "link-"+d.id})
+        .attr("id", function (d) {return "link-"+d.id})
         .attr('x1', function (d) {return d.source.x;})
         .attr('x2', function (d) {return d.target.x;})
         .attr('y1', function (d) {return d.source.y;})
@@ -191,43 +229,34 @@ function countRightLabelShift(line) {
     }
 }
 
-
-function addRightEdgeLabels(canvas) {
-    let id_counter = 0;
-    canvas.selectAll(".edgeLabelsRight")
-        .data(links, function(d) { return d.id = ++id_counter; })
-        .enter()
-        .append("text")
-        .attr("class", "edgeLabelsRight")
-        .attr("id", function(d) { return "edgeLabelRight-"+d.id })
-        .attr("y", function(d) { return d.target.y - ((d.target.y - d.source.y) / 2)})
-        .attr("x", function(d) { return countRightLabelShift(d)})
-        .text(function(d) { return d.target.edgeLabelRight; })
-        .attr("visibility", "hidden")
+function addEdgeLabels(canvas) {
+    let edgeLabels = canvas.append("g")
+        .attr("class", "edgeLabels")
         .attr("font-weight", "bold");
-}
-
-function addLeftEdgeLabels(canvas) {
-    let id_counter = 0;
-    canvas.selectAll(".edgeLabelsLeft")
-        .data(links, function(d) { return d.id = ++id_counter; })
-        .enter()
-        .append("text")
-        .attr("class", "edgeLabelsLeft")
-        .attr("id", function(d) { return "edgeLabelLeft-"+d.id })
-        .attr("y", function(d) { return d.target.y - ((d.target.y - d.source.y) / 2)})
-        .attr("x", function(d) { return countLeftLabelShift(d)})
-        .attr("width", "100px")
-        .text(function(d) { return d.target.edgeLabelLeft; })
-        .style("overflow", "hidden")
-        .attr("visibility", "hidden")
-        .attr("font-weight", "bold");
+    links.forEach(function(d) {
+       if (typeof d.target.edgeLabelRight !== "undefined") {
+           edgeLabels.append("text")
+               .attr("id", typeof d.target.actionOrder !== "undefined" ? "edgeLabelLeft-" + d.target.actionOrder : "edgeLabelLeft-" + d.target.nodeOrder)
+               .attr("y", d.target.y - ((d.target.y - d.source.y) / 2))
+               .attr("x", countRightLabelShift(d))
+               .text(d.target.edgeLabelRight)
+               .attr("visibility", "hidden")
+       }
+       if (typeof d.target.edgeLabelLeft !== "undefined") {
+           edgeLabels.append("text")
+               .attr("id", typeof d.target.actionOrder !== "undefined" ? "edgeLabelRight-" + d.target.actionOrder : "edgeLabelRight-" + d.target.nodeOrder)
+               .attr("y", d.target.y - ((d.target.y - d.source.y) / 2))
+               .attr("x", countLeftLabelShift(d))
+               .text(d.target.edgeLabelLeft)
+               .attr("visibility", "hidden")
+       }
+    });
 }
 
 function addNodes(canvas) {
-    let id_counter = 0;
-    let node = canvas.selectAll(".node")
-        .data(nodes, function (d) { return d.id = nodes[id_counter++].nodeOrder-1; })
+    let i = 0;
+    return canvas.selectAll(".node")
+        .data(nodes, function (d) { return d.id = nodes[i++].nodeOrder; })
         .enter()
         .append("g")
         .attr("id", function(d) { return "g-node-" +d.id})
@@ -235,7 +264,6 @@ function addNodes(canvas) {
         .attr("transform", function (d) {
             return "translate(" + d.x + "," + d.y + ")";
         });
-    return node;
 }
 
 function addNodeShape(node) {
@@ -245,7 +273,7 @@ function addNodeShape(node) {
         .attr("id",function(d){return "node-"+d.id})
         .style("fill", function(d) { return d.nodeColor === 'blank' ? "white" : d.nodeColor })
         .attr("d", d3.svg.symbol()
-            .size(function() { return typeof node_size === "undefined" ? 400 : node_size})
+            .size(function() { return node_size})
             .type(function(d) { return d.shape === "rectangle" ? "square" : "circle"}));
 }
 
@@ -271,7 +299,7 @@ function addBottomLabel(node) {
             "id" : function(d) { return "nodeLabel1-"+d.id; },
             "visibility" : "hidden",
             "text-anchor" : "middle",
-            "y" : function() { return typeof node_size === "undefined" ? 400/between_node_label_gap : node_size/between_node_label_gap},
+            "y" : function() { return node_size/between_node_label_gap},
             "font-weight" : "bold",
         });
 }
@@ -280,9 +308,9 @@ function addSideLabels() {
     for(let i=0;i<nodes.length;i++) {
         if (typeof nodes[i].sideLabels !== "undefined") {
             for(let j=0; j<nodes[i].sideLabels.length; j++) {
-                d3.select("#g-node-" + (nodes[i].nodeOrder-1))
+                d3.select("#g-node-" + nodes[i].nodeOrder)
                     .append("text")
-                    .attr("id","sideLabel-"+ (nodes[i].nodeOrder-1))
+                    .attr("id","sideLabel-"+ nodes[i].nodeOrder)
                     .attr("class", "sideLabels")
                     .attr("visibility", "hidden")
                     .text(nodes[i].sideLabels[j])
@@ -335,52 +363,39 @@ function hideAll(element) {
     d3.selectAll(element).attr("visibility", "hidden");
 }
 
-function revealBackJump(i) {
-    if (typeof nodes[i].jump !== "undefined") {
-        if (treeRevealed) {
-            d3.select("#jump-"+i).attr("stroke", "red");
-        }
-        else {
-            reveal("#jump-"+i);
-        }
-    }
-}
-
-function hideBackJump(i) {
-    if (typeof nodes[i].jump !== "undefined") {
-        if (treeRevealed) {
-            d3.select("#jump-"+i).attr("stroke", "black")
-        }
-        else {
-            hide("#jump-"+i);
-        }
-    }
-}
-
 function showFrame() {
     if (show_frame) {
-        for (let i = 0; i < nodes.length; i++) {
+        for (let i = firstItem; i <= lastItem; i++) {
             reveal("#node-" + i);
             reveal("#link-" + i);
-            reveal("#treeLabel-" + nodes[i].depth);
-            revealBackJump(i);
+            if (getNode(i) != null) {
+                reveal("#treeLabel-" + getNode(i).depth);
+            }
         }
-        counter = 1;
+        counter = 2;
         treeRevealed = true;
     }
 }
 
+function checkColorLimit() {
+    if (coloredLimit !== null) {
+        return counter < coloredLimit+1;
+    }
+    return true;
+}
+
 function showNode(i) {
     if(treeRevealed) {
-        if (typeof coloredLimit === "undefined" || i < coloredLimit+1) {
-            if (show_frame) {
-                reveal("#text-"+ (i));
-                reveal("#nodeLabel1-"+ (i));
-                reveal("#edgeLabelLeft-" + i);
-                reveal("#edgeLabelRight-"+ i);
-                revealAll("#sideLabel-"+ (i));
-            }
+        if (checkColorLimit()) {
+            reveal("#text-"+ (i));
+            reveal("#nodeLabel1-"+ (i));
+            reveal("#edgeLabelLeft-" + i);
+            reveal("#edgeLabelRight-"+ i);
+            revealAll("#sideLabel-"+ (i));
             d3.select("#link-" + i)
+                .attr("stroke", "red")
+                .attr("stroke-width", stroke_width*2);
+            d3.select("#jump-" + i)
                 .attr("stroke", "red")
                 .attr("stroke-width", stroke_width*2);
         }
@@ -393,15 +408,24 @@ function showNode(i) {
         reveal("#text-"+ i);
         reveal("#nodeLabel1-"+ i);
         reveal("#nodeLabel2-"+ i);
+        reveal("#jump-" + i)
         revealAll("#sideLabel-"+ i);
-        reveal("#treeLabel-" + nodes[i].depth);
+        if (getNode(i) != null) {
+            reveal("#treeLabel-" + getNode(i).depth);
+        }
     }
-    revealBackJump(i);
 }
 
 function hideNode(i) {
-    if(treeRevealed) {
+    if (treeRevealed) {
+        if (show_frame) {
+            hide("#edgeLabelRight-"+ i);
+            hide("#edgeLabelLeft-"+ i);
+        }
         d3.select("#link-" + i)
+            .attr("stroke", "black")
+            .attr("stroke-width", stroke_width);
+        d3.select("#jump-" + i)
             .attr("stroke", "black")
             .attr("stroke-width", stroke_width);
     }
@@ -416,25 +440,17 @@ function hideNode(i) {
         hideAll("#sideLabel-"+ i);
         hide("#jump-"+i)
     }
-    hideBackJump(i);
-}
-
-function checkColorLimit() {
-    if (show_frame) {
-        return counter < coloredLimit+1;
-    }
-    return true;
 }
 
 function showTree() {
     if (animationOn) {
         pause();
     }
-    for (counter; counter<nodes.length && checkColorLimit(); counter++) {
+    for (counter; counter<=lastItem && checkColorLimit(); counter++) {
         showNode(counter);
     }
     if (!treeRevealed) {
-        counter = 1;
+        counter = firstItem+1;
     }
     treeRevealed = true;
 }
@@ -443,18 +459,18 @@ function step() {
     if (animationOn) {
         pause();
     }
-    if(counter < nodes.length && checkColorLimit()) {
+    if(counter <= lastItem && checkColorLimit()) {
         showNode(counter);
         counter++;
     }
 }
 
 function timeNodes() {
-    if (show_frame && counter > coloredLimit) {
+    if (!checkColorLimit()) {
         pause();
     }
     else {
-        if(counter < nodes.length && checkColorLimit()) {
+        if(counter <= lastItem && checkColorLimit()) {
             showNode(counter);
             counter++;
         }
@@ -469,10 +485,10 @@ function animation() {
         pause();
     }
     else {
-        if(counter < nodes.length) {
+        if(counter <= lastItem) {
             document.getElementById("animation").innerHTML = "Pause";
             document.getElementById("animation").style.backgroundColor = "red";
-            window.interval = setInterval(timeNodes, 500)
+            window.interval = setInterval(timeNodes, animation_speed)
             animationOn = true;
         }
     }
@@ -482,7 +498,7 @@ function stepBack() {
     if (animationOn) {
         pause();
     }
-    if(counter > 1) {
+    if(counter > 2) {
         counter--;
         hideNode(counter);
     }
@@ -499,17 +515,15 @@ function reset() {
     if (animationOn) {
         pause();
     }
-    counter = 0;
     treeRevealed = false;
     d3.selectAll("svg").remove();
     init();
     nodeGap = 0;
-    console.log(counter);
     animationOn = false;
 }
 
-function restoreUntil(startFrom, restoreLimit) {
-    for(let i = startFrom; i < restoreLimit; i++) {
+function restoreUntil(restoreLimit) {
+    for(let i = firstItem; i < restoreLimit; i++) {
         step();
     }
 }
@@ -520,10 +534,10 @@ function restore() {
     reset();
     if(wasRevealed) {
         showTree();
-        restoreUntil(1, restoreLimit);
+        restoreUntil(restoreLimit-1);
     }
     else {
-        restoreUntil(0, restoreLimit);
+        restoreUntil(restoreLimit);
     }
 }
 

@@ -2,43 +2,82 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Tree Algorithms</title>
+    <title>Tree search algorithms</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
 </head>
 <style>
-    .algorithm_list {
+    .algorithm_list, .navigationBar {
         width: 250px;
+        padding-top: 40px;
     }
 
-    .algorithm_list a {
+    .algorithm_list a, .navigationBar {
         background-color: #eee;
         color: black;
         display: block;
-        padding: 12px;
+        padding: 16px;
         text-decoration: none;
         border: 1px solid #555;
-        padding-left:20px;
     }
 
-    .algorithm_list a:hover {
+    .navigationBar {
+        text-align: left;
+    }
+
+    .algorithm_list a:hover, .navigationBar:hover {
         background-color: #ccc;
     }
 
-    .algorithm_list a.active {
+    .algorithm_list a.active, .navigationBar.active {
         background-color: #4CAF50;
         color: white;
     }
+    .navigationContainer {
+        display: none;
+        padding-left: 10px;
+    }
+    .fa-caret-down {
+        float: right;
+        padding-right: 8px;
+    }
+
 </style>
 <body>
-    <div class="algorithm_list">
+    <div style="float:right">
+        <address>In case you have any questions or improvements please contact me at 456604@mail.muni.cz</address>
+        <b><em style="float:right">version 1.1 (29.11.2019)</em></b>
+    </div>
+    <p><b>Solve particular problem</b></p>
+    <form action = "http://localhost:9999/cgi/execute.cgi" onsubmit="return validateForm()" method="get" target="_blank" name="myForm">
+        <select name="algorithm" style="font-size:16px;padding:10px">
+            <option value="1">Backtracking</option>
+            <option value="2">Forward-Checking</option>
+            <option value="3">Full Look-ahead</option>
+            <!--<option value="4">Gaschnig Backjumping</option>-->
+        </select>
+        Domains: <input type = "text" name = "domains" value = '{"A" : {1,2,3}, "B" : {1,2,3}, "C" : {1,2,3}}' style="width:300px"/>
+        Constraints: <input type = "text" name = "constraints" value = "A>B,B>C" style="width:300px"/>
+        <input type = "submit" value = "Solve"/>
+    </form>
+    <em>(Please follow the template syntax.)</em>
+
+    <div class="algorithm_list" style="float:left">
         <p><b>General Search Strategies</b></p>
         <a href="samples/backtracking.html" target="_blank">Backtracking</a>
         <a href="samples/forward_checking.html" target="_blank">Forward-Checking</a>
         <a href="samples/arc_consistency.html" target="_blank">Full Look Ahead</a>
-        <a href="samples/gaschnig.html" target="_blank">Gaschnig Backjumping</a>
-        <a href="samples/cbj.html" target="_blank">Conflict-Directed backjumping</a>
+        <button class="navigationBar">Gaschnig's Backjumping<i class="fa fa-caret-down"></i></button>
+        <div class="navigationContainer">
+            <a href="samples/gaschnig.html" target="_blank">Basic example</a>
+            <a href="samples/gaschnig2.html" target="_blank">Advanced example</a>
+        </div>
+        <button class="navigationBar">Conflict-Directed backjumping<i class="fa fa-caret-down"></i></button>
+        <div class="navigationContainer">
+            <a href="samples/cbj2.html" target="_blank">Advanced example</a>
+        </div>
     </div>
 
-    <div class="algorithm_list">
+    <div class="algorithm_list" style="float:left;padding-left:20px" >
         <p><b>Incomplete Tree Search Strategies</b></p>
         <a href="samples/dfs.html" target="_blank">Depth first search</a>
         <a href="samples/bbs.html" target="_blank">Bounded-backtrack search</a>
@@ -48,20 +87,6 @@
         <a href="samples/lds.html" target="_blank">Limited discrepancy search</a>
     </div>
 
-    <p><b>Solve particular problem</b></p>
-    <form action = "http://localhost:9999/cgi/script.cgi" onsubmit="return validateForm()" method="get" target="_blank" name="myForm">
-        <select name="algorithm">
-            <option value="1">Backtracking</option>
-            <option value="2">Forward-Checking</option>
-            <option value="3">Full Look-ahead</option>
-            <!--<option value="4">Gaschnig Backjumping</option>-->
-            </select>
-        Domains: <input type = "text" name = "domains" value = '{"A" : {1,2,3}, "B" : {1,2,3}, "C" : {1,2,3}}' style="width:300px"/>
-        Constraints: <input type = "text" name = "constraints" value = "A>B,B>C" style="width:300px"/>
-        <input type = "submit" value = "Solve"/>
-    </form>
-    <em>(Please follow the template syntax.)</em>
-    
     <!--
     <p><b>Try incomplete tree search strategies with different input values</b></p>
     <form action = "http://localhost:9999/cgi/script.cgi" onsubmit="return validateForm()" method="get" target="_blank" name="myForm">
@@ -73,9 +98,6 @@
         Value(e.g.DFS(2)) : <input type = "text" name = "value" value = "1" style="width:300px"/>
         <input type = "submit" value = "Solve"/>
     </form>-->
-    <address style= "padding-top:100px">
-        In case you have any questions, ideas or improvements please contact me at andrej.betik@gmail.com
-    </address>
 
     <script>
         function validateDomain(domain) {
@@ -92,7 +114,7 @@
 
                 var valid_ok = true;
                 for(var i=0; i<arr.length; i++) {
-                    var internal_patt = new RegExp("^\"[A-Za-z0-9]*\"\\s*:\\s*{\\s*[0-9a-zA-Z][\\s*,0-9a-zA-Z]*}\\s*$");
+                    var internal_patt = new RegExp("^\"[A-Z0-9]*\"\\s*:\\s*{\\s*[0-9a-zA-Z][\\s*,0-9a-zA-Z]*}\\s*$");
                     if (!internal_patt.test(arr[i])) {
                         valid_ok = false;
                         break;
@@ -112,7 +134,8 @@
                 eval(constraints);
                 return true;
             } catch (e) {
-                alert("Constraints contain syntax error\nHint:use python operators, eg. == instead of =");
+                alert("Syntax error in constraints\nHint:use python operators == instead of =\n" +
+                    "Eg. A>B,B==C");
                 return false;
             }
         }
@@ -120,10 +143,26 @@
             let domains = document.forms["myForm"]["domains"].value;
             let constraints = document.forms["myForm"]["constraints"].value;
             if (!validateDomain(domains)) {
-                alert("Domains contain syntax error, follow the example syntax")
+                alert("Syntax error in domains\nWrite attributes with capital letters" +
+                    "\nEg. {\"A\" : {1,2,3}, \"B\" : {1,2,3}, \"C\" : {1,2,3}}");
                 return false;
             }
             return validateConstraints(constraints);
+        }
+
+        var dropdown = document.getElementsByClassName("navigationBar");
+        var i;
+
+        for (i = 0; i < dropdown.length; i++) {
+            dropdown[i].addEventListener("click", function() {
+                this.classList.toggle("active");
+                var dropdownContent = this.nextElementSibling;
+                if (dropdownContent.style.display === "block") {
+                    dropdownContent.style.display = "none";
+                } else {
+                    dropdownContent.style.display = "block";
+                }
+            });
         }
     </script>
 </body>

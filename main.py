@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import solver, cgi, create_tree
+import solver, cgi, merge, parser, sys
 
 def printHtml():
     print("Content-type:text/html\r\n\r\n")
@@ -9,30 +9,40 @@ def printHtml():
     for line in lines:
         print(line)
     f.close()
+    
+# Transforms values to strings if they are lowercase letters. Does not effect number values.
+# E.g. "A" : {r,b,g}  ---- > "A" : {"r","b","g"}
+def values_to_strings(domains):
+    s = ""
+    for l in domains:
+        if l.islower():
+            s += '"' + l + '"' 
+        else:
+            s += l
+    return s
 
-form = cgi.FieldStorage()
-algorithm = form.getvalue('algorithm')
-if algorithm.isdigit():
-    domains = form.getvalue('domains')
-    constraints = form.getvalue('constraints')
-    output_file_name = "output.html"
-    config_str = solver.solve(algorithm, domains, constraints)
-    create_tree.make_html(config_str, output_file_name)
+def generate_visualization(cfg, output_file_name):
+    # split into lines and separate header options and node data
+    nodes = cfg.split("\n")[4:]
+    # parser create json file
+    parser.parse(nodes)
+    header = cfg.split("\n")[:4]
+    merge.merge(header, output_file_name, cfg)
     printHtml()
-else:
-    domains = '{"A" : {1,2,3,4,5}, "B" : {1,2,3}, "C" : {1,2}}'
-    constraints = 'A>C'
-    value = int(form.getvalue('value'))
-    #value = int("3")
-    output_file_name = "output.html"
-    config_str = solver.solve('1', domains, constraints)
-    create_tree.make_html_incomplete_search(config_str, output_file_name, value, algorithm)
-    printHtml()
-
-'''
-algorithm = '3'
-domains = '{"V1" : {1,2,3,4}, "V2" : {1,2,3}, "V3" : {1,2,3}}'
-constraints = 'V1>V2,V2==3*V3'
-config_str = solver.solve(algorithm, domains, constraints)
-create_tree.make_html(config_str, "output.html")
-'''
+    
+if __name__ == "__main__":
+    args = sys.argv
+    config_str = ""
+    if (len(args) == 1):
+        # solve and create the data file
+        form = cgi.FieldStorage()
+        algorithm = form.getvalue('algorithm')
+        domains = form.getvalue('domains')
+        constraints = form.getvalue('constraints')
+        domains = values_to_strings(domains)
+        config_str = solver.solve(algorithm, domains, constraints)
+    else:
+        # load the data from file
+        config_str = open(args[1], "r").read()
+    generate_visualization(config_str, "output.html")
+            
