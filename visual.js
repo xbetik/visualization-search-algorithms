@@ -2,7 +2,7 @@ const padding_x = 250;
 const padding_y = 90;
 const most_right_label_padding = 150;
 const most_down_label_padding = 50;
-const between_node_label_gap = 10;
+const between_node_label_gap = 13;
 let tree_width = 960;
 let tree_height = 180;
 let treeRevealed = false;
@@ -18,6 +18,9 @@ let node_size = 400,stroke_width=1.5,coloredLimit=null,show_frame=false,animatio
 /* #AdditionalVariableTag. This tag marks the place where additional constants will be placed. DO NOT REMOVE IT */
 init();
 
+/**
+ * Initialize the visualization including the svg and its elements (nodes, links etc.)
+ */
 function init() {
     let svg = d3.select("body").append("svg");
     let canvas = svg.attr({
@@ -32,7 +35,7 @@ function init() {
         .size([tree_width]);
 
     nodes = tree.nodes(treeData);
-    links = getLinks();
+    links = createLinks();
     // Normalize the depth
     nodes.forEach(function(d) { d.y = d.depth * tree_height; });
 
@@ -53,6 +56,10 @@ function init() {
     showFrame();
 }
 
+/**
+ * Get the index of the first node (or action)
+ * @returns {number} min Index of first item
+ */
 function getFirstItem() {
     let min = 100;
     nodes.forEach(function(d) {
@@ -70,6 +77,10 @@ function getFirstItem() {
     return min;
 }
 
+/**
+ * Get the index of the last node (or action)
+ * @returns {number} max Index of last item
+ */
 function getLastItem() {
     let max = -1;
     nodes.forEach(function(d) {
@@ -87,6 +98,10 @@ function getLastItem() {
     return max;
 }
 
+/**
+ * Adds jumps to canvas. The source of the jump is the current node. The target is the node with the given nodeOrder.
+ * @param {svg} svg Canvas of elements
+ */
 function addJumps(svg) {
     var lineFunction = d3.svg.line()
         .x(function(d) { return d.x; })
@@ -119,6 +134,11 @@ function addJumps(svg) {
     }
 }
 
+/**
+ * Gets a node with given order.
+ * @param {number} order Timestamp of the node represented by nodeOrder attribute
+ * @returns {null|Object} {null|node}
+ */
 function getNode(order) {
     for (let i=0;i<nodes.length;i++) {
         if (nodes[i].nodeOrder === order) {
@@ -128,8 +148,11 @@ function getNode(order) {
     return null;
 }
 
-
-function getLinks() {
+/**
+ * Creates array of links. Each link is defined by source node and target node.
+ * @returns {Array.<Object>}
+ */
+function createLinks() {
     let links = [];
     for(let i=1; i < nodes.length; i++) {
         links.push( { source : nodes[i].parent, target : nodes[i] } );
@@ -137,6 +160,10 @@ function getLinks() {
     return links;
 }
 
+/**
+ * Adds marker definitions.
+ * @param {svg} svg Canvas of elements
+ */
 function addMarkers(svg) {
     svg.append("marker")
         .attr("id", "arrowToNode")
@@ -167,6 +194,10 @@ function addMarkers(svg) {
         .style('stroke','black');
 }
 
+/**
+ * Adds links to canvas. SVG element line is used for link representation. Several properties of the link are justified.
+ * @param {svg} canvas Canvas of elements
+ */
 function addLinks(canvas) {
     let i = 1;
     let links_group = canvas.append("g")
@@ -189,6 +220,11 @@ function addLinks(canvas) {
         .attr("marker-start", function(d) { return d.target.arrowFromNode === "yes" ? "url(#arrowFromNode)" : "url()"});
 }
 
+/**
+ * Counts the position of left edge label
+ * @param {Object} line Link between node1 and node2 defined as { source: node1, target: node2 }
+ * @returns {number} The position of the left edge label
+ */
 function countLeftLabelShift(line) {
     let multiply_constant = 2;
     let opposite = line.target.y-line.source.y;
@@ -209,6 +245,11 @@ function countLeftLabelShift(line) {
     }
 }
 
+/**
+ * Counts the position of right edge label
+ * @param {Object} line Link between node1 and node2 defined as { source: node1, target: node2 }
+ * @returns {number} The position of the right edge label
+ */
 function countRightLabelShift(line) {
     let multiply_constant = 2;
     let opposite = line.target.y-line.source.y;
@@ -229,6 +270,10 @@ function countRightLabelShift(line) {
     }
 }
 
+/**
+ * Adds edge labels. The edge label is represented by SVG element text.
+ * @param {svg} canvas Canvas of elements
+ */
 function addEdgeLabels(canvas) {
     let edgeLabels = canvas.append("g")
         .attr("class", "edgeLabels")
@@ -253,6 +298,11 @@ function addEdgeLabels(canvas) {
     });
 }
 
+/**
+ * Creates a group for nodes and a selection which represents a reference to all the nodes.
+ * @param {svg} canvas Canvas of elements
+ * @returns {Object} node Selection of all the nodes.
+ */
 function addNodes(canvas) {
     let i = 0;
     return canvas.selectAll(".node")
@@ -266,6 +316,10 @@ function addNodes(canvas) {
         });
 }
 
+/**
+ * Adds nodes and specifies the shape using SVG element path.
+ * @param {Object} node Selection of nodes.
+ */
 function addNodeShape(node) {
     node.append("path")
         .style("stroke", "black")
@@ -277,6 +331,10 @@ function addNodeShape(node) {
             .type(function(d) { return d.shape === "rectangle" ? "square" : "circle"}));
 }
 
+/**
+ * Adds node labels representing domain values using SVG element text.
+ * @param {Object} node Selection of nodes
+ */
 function addNodeName(node) {
     node.append("text")
         .attr("class", "nodeName")
@@ -286,11 +344,15 @@ function addNodeName(node) {
         .style("fill", function(d) { return typeof d.nodeColor === "undefined" ? "white" : "black" })
         .attr({
             "text-anchor" : "middle",
-            "y" : 6,
+            "y" : 7,
             "font-weight" : "bold"
         });
 }
 
+/**
+ * Adds node bottom labels representing the constraints causing the inconsistency. Using SVG element text.
+ * @param {Object} node
+ */
 function addBottomLabel(node) {
     node.append("text")
         .attr("class", "nodeLabel")
@@ -304,6 +366,9 @@ function addBottomLabel(node) {
         });
 }
 
+/**
+ * Adds node side labels representing the updated domains after forward-check/full look-ahead. Using SVG element text.
+ */
 function addSideLabels() {
     for(let i=0;i<nodes.length;i++) {
         if (typeof nodes[i].sideLabels !== "undefined") {
@@ -324,6 +389,10 @@ function addSideLabels() {
     }
 }
 
+/**
+ * Adds tree labels representing CSP variables.
+ * @param {svg} canvas Canvas of elements.
+ */
 function addTreeLabel(canvas) {
     let level = 1;
     let domain_labels = canvas.append("g")
@@ -347,22 +416,41 @@ function addTreeLabel(canvas) {
         });
 }
 
+/**
+ * Reveals an element with given ID.
+ * @param {string} element ID of element
+ */
 function reveal(element) {
     d3.select(element).attr("visibility", "visible");
 }
 
+/**
+ * Reveals all the elements with given ID
+ * @param {string} element ID of element
+ */
 function revealAll(element) {
     d3.selectAll(element).attr("visibility", "visible");
 }
 
+/**
+ * Hide an element with given ID
+ * @param {string} element ID of element
+ */
 function hide(element) {
     d3.select(element).attr("visibility", "hidden");
 }
 
+/**
+ * Hide all the elements with given ID
+ * @param {string} element ID of element
+ */
 function hideAll(element) {
     d3.selectAll(element).attr("visibility", "hidden");
 }
 
+/**
+ * Reveals all the items. Represents graph skeleton for incomplete search algorithms.
+ */
 function showFrame() {
     if (show_frame) {
         for (let i = firstItem; i <= lastItem; i++) {
@@ -377,6 +465,10 @@ function showFrame() {
     }
 }
 
+/**
+ * Checks if the number of colored nodes exceed the total allowed.
+ * @returns {boolean} False if limit of colored nodes exceeds, True otherwise.
+ */
 function checkColorLimit() {
     if (coloredLimit !== null) {
         return counter < coloredLimit+1;
@@ -384,7 +476,11 @@ function checkColorLimit() {
     return true;
 }
 
-function showNode(i) {
+/**
+ * Represents one step in the animation. Reveals all the elements with given index i.
+ * @param {number} i Index of elements to be revealed.
+ */
+function showElements(i) {
     if(treeRevealed) {
         if (checkColorLimit()) {
             reveal("#text-"+ (i));
@@ -416,6 +512,10 @@ function showNode(i) {
     }
 }
 
+/**
+ * Represents step backward in the animation. Hide all the elements with given index i.
+ * @param {number} i Index of elements to be revealed.
+ */
 function hideNode(i) {
     if (treeRevealed) {
         if (show_frame) {
@@ -442,12 +542,15 @@ function hideNode(i) {
     }
 }
 
+/**
+ * Reveals the whole tree (performs all the steps at once). Corresponds to ShowTree button.
+ */
 function showTree() {
     if (animationOn) {
         pause();
     }
     for (counter; counter<=lastItem && checkColorLimit(); counter++) {
-        showNode(counter);
+        showElements(counter);
     }
     if (!treeRevealed) {
         counter = firstItem+1;
@@ -455,23 +558,29 @@ function showTree() {
     treeRevealed = true;
 }
 
+/**
+ * Performs one step of the animation. Corresponds to Step button.
+ */
 function step() {
     if (animationOn) {
         pause();
     }
     if(counter <= lastItem && checkColorLimit()) {
-        showNode(counter);
+        showElements(counter);
         counter++;
     }
 }
 
+/**
+ *  Looping function used in animation. Performs one step every 500 milliseconds (default).
+ */
 function timeNodes() {
     if (!checkColorLimit()) {
         pause();
     }
     else {
         if(counter <= lastItem && checkColorLimit()) {
-            showNode(counter);
+            showElements(counter);
             counter++;
         }
         else {
@@ -480,6 +589,10 @@ function timeNodes() {
     }
 }
 
+/**
+ * Represents an animation. External function timeNodes() used as a looping function inside the setInterval command.
+ * Corresponds to button Animation.
+ */
 function animation() {
     if (animationOn) {
         pause();
@@ -488,12 +601,15 @@ function animation() {
         if(counter <= lastItem) {
             document.getElementById("animation").innerHTML = "Pause";
             document.getElementById("animation").style.backgroundColor = "red";
-            window.interval = setInterval(timeNodes, animation_speed)
+            window.interval = setInterval(timeNodes, animation_speed);
             animationOn = true;
         }
     }
 }
 
+/**
+ * Performs one step backward. Corresponds to StepBack.
+ */
 function stepBack() {
     if (animationOn) {
         pause();
@@ -504,6 +620,9 @@ function stepBack() {
     }
 }
 
+/**
+ * Pauses the animation. Corresponding to Pause button which is displayed when the animation is on.
+ */
 function pause() {
     document.getElementById("animation").innerHTML = "Animation";
     document.getElementById("animation").style.backgroundColor = "";
@@ -511,6 +630,9 @@ function pause() {
     animationOn = false;
 }
 
+/**
+ * Resets the visualization. Removes and re-initializes the svg.
+ */
 function reset() {
     if (animationOn) {
         pause();
@@ -522,18 +644,27 @@ function reset() {
     animationOn = false;
 }
 
+/**
+ * Restores the original graph partially.
+ * @param {number} restoreLimit The index of the last revealed element of the original graph.
+ */
 function restoreUntil(restoreLimit) {
     for(let i = firstItem; i < restoreLimit; i++) {
         step();
     }
 }
 
+/**
+ * Restore the visualization to original state. This function is used if the height and width of the graph is adjusted and the graph needs to be re-generated.
+ */
 function restore() {
     let restoreLimit = counter;
     let wasRevealed = treeRevealed;
     reset();
     if(wasRevealed) {
-        showTree();
+        if (!show_frame) {
+            showTree();
+        }
         restoreUntil(restoreLimit-1);
     }
     else {
@@ -541,16 +672,25 @@ function restore() {
     }
 }
 
+/**
+ * Adjusts the height of the graph. Corresponds to height range bar.
+ */
 heightSlider.oninput = function() {
     tree_height = this.value*36;
     restore();
 };
 
+/**
+ * Adjusts the width of the graph. Corresponds to width range bar.
+ */
 widthSlider.oninput = function() {
     tree_width = this.value*320;
     restore();
 };
 
+/**
+ * Saves canvas to PNG. This function requires library html2canvas.min.js. Corresponds to button SavePNG.
+ */
 function saveTreeToPng() {
     html2canvas(document.body).then(function(canvas) {
         let image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
@@ -558,6 +698,9 @@ function saveTreeToPng() {
     });
 }
 
+/**
+ * Shows the config file with an option to modify the file and re-generate the visualization. Corresponds to button ShowConfig.
+ */
 function showConfig() {
     if (cfg_shown) {
         document.getElementById("configFile").style.visibility = "hidden";

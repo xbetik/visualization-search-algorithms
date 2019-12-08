@@ -15,6 +15,14 @@ def parse_nodes(lines):
     return assignment_info, size_options, nodes
 
 def add_html(output_file):
+    """Adds HTML structure (control panel, buttons, etc.) to final compact HTML file
+    
+    Parameters:
+      output_file (file) Output file
+      
+    Returns:
+      Void function (Adds structure to final file)
+    """
     html_file = open("structure.html", "r")
     lines = html_file.read().splitlines()
     for line in lines:
@@ -27,12 +35,32 @@ def parse_size_options(size_options):
     return arr[0].split("=")[1], arr[1].split("=")[1], arr[2].split("=")[1], arr[3].split("=")[1], arr[4].split("=")[1], arr[5].split("=")[1], arr[6].split("=")[1], arr[7].split("=")[1]
 
 def set_style_size_options(f, description, variable_label, node_label):
+    """Adds font size configuration
+    
+    Parameters:
+      f (file) Output file
+      description (string) Initial font size (string number) of description   
+      variable_label (string) Initial font size (string number) of variable labels
+      node_label (string) Initial font size (string number) of node labels
+      
+    Returns:
+      Void function (Adds font siez config to final file)
+    """
     f.write("    #description { font-size : " + description + "px; }\n")
     f.write("    .domain_label { font-size : " + variable_label + "px; }\n")
     f.write("    .sideLabels, .nodeLabel, .nodeName, .edgeLabels { font-size : " + node_label + "px; }\n")
     f.write("</style>\n")
 
 def add_css(output_file, size_options):
+    """Adds CSS part to final compact HTML file
+    
+    Parameters:
+      output_file (file) Output file
+      size_options (string) Initial configurations
+      
+    Returns:
+      Void function (Adds CSS to final file)
+    """
     css_file = open("style.css", "r")
     lines = css_file.read().splitlines()
     output_file.write("<style>\n")
@@ -42,6 +70,17 @@ def add_css(output_file, size_options):
     set_style_size_options(output_file, desc, variable_label, node_label)
     
 def add_javascript(output_file, problem_description, size_options, config_str):
+    """Adds JavaScript part to final compact HTML file
+    
+    Parameters:
+      output_file (file) Output file
+      problem_description (list) CSP description: algorithm name, domains, constraints
+      size_options (string) Initial configurations
+      config_str (string) Represents input data file 
+      
+    Returns:
+      Void function (Adds JavaScript to final file)
+    """
     def add_labels(f, problem_description):
         f.write("<script>\n")
         f.write("var labels = [")
@@ -108,6 +147,16 @@ def add_javascript(output_file, problem_description, size_options, config_str):
 
 
 def merge(header, f_name, config_str):
+    """Merges JavaScript, CSS, HTML, JSON files into single and independent HTML file representing the visualization
+    
+    Parameters:
+      header (list) List of strings representing individual components of header part of the input data file
+      f_name (string) Name of the output HTML file
+      config_str (string) Represents input data file 
+      
+    Returns:
+      Void function (Creates output file)
+    """
     output_file = open(f_name, "w+")
     add_html(output_file)
     add_css(output_file, header[-1])

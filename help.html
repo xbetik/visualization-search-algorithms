@@ -52,30 +52,36 @@
 <body>
 
 <div class="tab">
-    <button class="tablinks" onclick="showHelp(event, 'params')" id="defaultOpen">Config Parameters</button>
-    <button class="tablinks" onclick="showHelp(event, 'options')">Size Parameters</button>
+    <button class="tablinks" onclick="showHelp(event, 'params')" id="defaultOpen">Input file</button>
+    <button class="tablinks" onclick="showHelp(event, 'options')">Size options</button>
 </div>
 
 <div id="options" class="tabcontent">
-    <img src="options.png">
+    <img src="help.png">
 </div>
 
 <div id="params" class="tabcontent">
-    <pre>Header
+    The input text file consists of 2 parts: Header and Body<br>
+    Below is an explanation of both parts and its individual components. <br>
+    An example of input data text file is presented, which includes all the possible attributes. you can copy and paste the code and see the output.
+    <pre>Header (See <b>Size options</b> in left upper corner for details)
     #Algorithm name
     #Variable and its domain
     #Constraints
-    #Size parameters
+    #Initial configuration
         <em>description_size</em>
         <em>node_size</em>
         <em>edge_size</em>
         <em>variable_label_size</em>
         <em>node_label_size</em>
         <em>show_frame</em>
+            Use this attribute if you want to show the skeleton of the graph initially. Look at examples of incomplete search tree algorithms where we use this attribute.
         <em>colored_limit</em>
+            The number of colored nodes. Mostly used in incomplete search tree algorithms where we want to color only some nodes.
         <em>animation_speed</em>
+            The animation speed in milliseconds.
     </pre>
-    <pre>Config Parameters
+    <pre>Body (Single config line consists of following attributes. The required attributes are path, name, order. Rest are optional.)
     <b>path</b> : place of the node in hierarchy(R0A1B2:R0-root,A1-first child of root,B2: second child of node A) <b>usage</b>:path:=R0A1B1C1D1
     <b>name</b> : name of the node(string) <b>usage</b>:name:=1
     <b>order</b> : appearance order of nodes(number between 1-infinity) <b>usage</b>:order:=1
@@ -89,7 +95,7 @@
     <b>right_edge_label</b> : right edge label name <b>usage</b>:right_edge_label:=(c3)
     <b>dash</b> : edge directing to this node is dashed(boolean) <b>usage</b>:dash:=yes
     <b>arrow</b> : edge has arrow pointing to node or from node(to,from,both) <b>usage</b>:arrow:=to
-    <b>jump</b> : edge from current node to parent of following node(it jumps to parent of current_node.order+1) usually placed in different area(boolean)) <b>usage</b>:jump=yes
+    <b>jump</b> : edge from current node to the node with order=value, where value is a parameter<b>usage</b>:jump=3
     <b>action_order</b> : gives an action special timestamp <b>usage</b>:action_order:=2
         <em>This attribute can be used for edges or jumps</em>
         <em>Example usage can be seen in backjumping algorithms or incomplete search algoritms</em></pre>
