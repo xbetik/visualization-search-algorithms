@@ -21,7 +21,7 @@ We can execute the application with command:
     $ python3 main.py tree_data.txt
 where tree_data.txt represents our input text data file.
 
-We either write the input file manually or generate it using the solver with following command: (The first line is a template. The second line represents a particular example of calling. We need to insert the arguments in single quotation marks.)
+We either write the input file manually or generate it using the solver with with parameters: algorithm, domains, constraints. For instance, lets solve a particular CSP with 3 attributes A,B,C, domain values 1,2,3 for each attribute and constraints A>B and B>C. The following commands do the job:
 
 .. code-block:: console
 
