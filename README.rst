@@ -3,7 +3,7 @@ Visualization of tree search algorithms
 
 Introduction
 ------------
-This application help with generating interactive visualizations of various tree search algorithms for CSP problem.
+This application help with generating interactive visualizations of various tree search algorithms for CSP problem. The application is mainly used from web browser on website reffered below, but you can download the files and execute it locally with commands described below.
 
 Application website reference
 ----------
