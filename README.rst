@@ -8,7 +8,9 @@ This application help with generating interactive visualizations of various tree
 Related references
 ----------
 Online website is located at: https://www.fi.muni.cz/~hanka/vis/
+
 The source code is available at at: https://github.com/xbetik/visualization-search-algorithms
+
 The code documentation is located at /doc subdirectory.
 
 The usage
