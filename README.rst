@@ -5,13 +5,11 @@ Introduction
 ------------
 This application help with generating interactive visualizations of various tree search algorithms for CSP problem.
 
-Related references
+Application website reference
 ----------
 Online website is located at: https://www.fi.muni.cz/~hanka/vis/
 
-The source code is available at at: https://github.com/xbetik/visualization-search-algorithms
-
-The code documentation is located at /doc subdirectory.
+The source code documentation of application is located at /doc subdirectory.
 
 The usage
 ~~~~~~~~~~~~~
